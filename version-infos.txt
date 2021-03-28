@@ -1,0 +1,24 @@
+Boards-Manager
+[https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json]
+esp32 espressif 1.0.0 !!!!!!!!!!!
+staring with1.0.1 gives:
+    libraries/AsyncTCP/src/AsyncTCP.cpp:195:27: error: field 'call' has incomplete type 'tcpip_api_call'
+    
+Board
+ESP32 Dev
+
+/home/hgode/bin/arduino-1.8.13/portable/packages/esp32/tools/xtensa-esp32-elf-gcc/1.22.0-80-g6c4433a-5.2.0/bin/xtensa-esp32-elf-size -A  
+
+Multiple libraries were found for "WiFi.h"
+ Used: /home/hgode/bin/arduino-1.8.13/portable/packages/esp32/hardware/esp32/1.0.0/libraries/WiFi
+ Not used: /home/hgode/bin/arduino-1.8.13/libraries/WiFi
+Using library NeoPixelBus at version 2.2.9 in folder: /home/hgode/SketchBook/libraries/NeoPixelBus 
+Using library SPI at version 1.0 in folder: /home/hgode/bin/arduino-1.8.13/portable/packages/esp32/hardware/esp32/1.0.0/libraries/SPI 
+Using library WiFi at version 1.0 in folder: /home/hgode/bin/arduino-1.8.13/portable/packages/esp32/hardware/esp32/1.0.0/libraries/WiFi 
+Using library FS at version 1.0 in folder: /home/hgode/bin/arduino-1.8.13/portable/packages/esp32/hardware/esp32/1.0.0/libraries/FS 
+Using library AsyncTCP at version 1.0.0 in folder: /home/hgode/SketchBook/libraries/AsyncTCP 
+Using library ESPAsyncWebServer at version 1.1.0 in folder: /home/hgode/SketchBook/libraries/ESPAsyncWebServer 
+Using library ArduinoJson at version 5.13.1 in folder: /home/hgode/SketchBook/libraries/ArduinoJson 
+Using library Preferences at version 1.0 in folder: /home/hgode/bin/arduino-1.8.13/portable/packages/esp32/hardware/esp32/1.0.0/libraries/Preferences 
+Using library ESPmDNS at version 1.0 in folder: /home/hgode/bin/arduino-1.8.13/portable/packages/esp32/hardware/esp32/1.0.0/libraries/ESPmDNS 
+
