@@ -1,3 +1,35 @@
+K2400 Additions
+
+String NTPstring = "de.pool.ntp.org";             //Webaddress for timeserver
+String NTPtzstring ="CET-1CEST,M3.5.0/03,M10.5.0/03";
+
+  preferences.putString("NTP", NTPstring);
+  preferences.putString("NTPtzstring", NTPtzstring);
+
+  NTPstring = preferences.getString("NTP");
+  NTPtzstring = preferences.getString("NTPtzstring");
+
+  DEBUG_PRINT("NTP TZ string is: ");
+  DEBUG_PRINTLN(NTPtzstring);
+
+  $(\"#NTPtextbox\").val(jsonData.NTP); \
+  $(\"#NTPtztextbox\").val(jsonData.NTPtzString); \
+
+    $('#NTPtextbox').val('time.google.com'); \
+    $('#NTPtztextbox').val('CET-1CEST,M3.5.0/2,M10.5.0/3'); \
+
+  function ntpsave(){ \
+    if (NTPInputValidation()){ \
+      $.post(\"ntpsave\",{ \
+        NTP: $(\"#NTPtextbox\").val(), \
+        NTPtzstring: $(\"#NTPtztextbox\").val(), \
+        GMT: $(\"#GMTtextbox\").val(), \
+        DST: $(\"#DSTtextbox\").val() \
+
+  <div class=\"textboxcontainer\"> <input type=\"text\" class=\"textbox\" id=\"NTPtextbox\" placeholder=\"Enter new NTP server here\"/> </div> \ 
+  <div class=\"textboxcontainer\"> <input type=\"text\" class=\"textbox\" id=\"NTPtztextbox\" placeholder=\"Enter new NTP TZ string here\"/> </div> \ 
+
+
 You can use a TZ string to explicitly set TZ and DST moments.
 I use something like this to set TZ:
 

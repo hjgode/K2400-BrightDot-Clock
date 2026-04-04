@@ -1,3 +1,9 @@
+#include <NeoPixelBus.h>
+#include <NeoPixelAnimator.h>
+#include <NeoPixelBrightnessBus.h>
+//the order of includes is important
+#include <ArduinoJson.h>
+
 /*
  * Clock firmware 1.0
  * 
@@ -6,8 +12,8 @@
  * 2018
  */
 //-------------------------------------------------------------------------------
-#include <NeoPixelBus.h>
-#include <NeoPixelAnimator.h>
+//#include <NeoPixelBus.h>
+//#include <NeoPixelAnimator.h>
 #include <WiFi.h>
 #include <FS.h>
 #include <AsyncTCP.h>
@@ -20,7 +26,7 @@
 #include <WiFiUdp.h>
 //-------------------------------------------------------------------------------
 #define RECONINTERVAL 10
-//#define DEBUG                                     //uncomment to enable debug messages over serial
+#define DEBUG                                     //uncomment to enable debug messages over serial
 
 #ifdef DEBUG
  #define DEBUG_PRINT(x)     Serial.print (x)
@@ -45,14 +51,226 @@ const int udpPort = 30303;                        //Port for UDP broadcast
 WiFiUDP udp;                                      //create UDP instance
 //-------------------------------------------------------------------------------
 const char HTML1[] PROGMEM = {"<!doctype html><html><head><meta name=\"apple-mobile-web-app-capable\" content=\"yes\"/><meta name=\"apple-mobile-web-app-status-bar-style\" content=\"black\"><meta name=\"format-detection\" content=\"telephone=no\"><meta name=\"viewport\" content=\"width=device-width, user-scalable=no, initial-scale=1.0\"><meta charset=\"utf-8\"><title>K2400 Clock</title><style>body{background-color: white; color: #555555; text-decoration: none; font-family: \"Trebuchet MS\", Helvetica, sans-serif; font-weight: bold; margin-left: 40px; margin-right: 40px;}p{color: #555555; text-indent: 10px; text-transform: uppercase; margin:50px 0px 0px 0px; font-size: 18px; padding-bottom: 10px;}.propertycontainer{width: 100%; min-width: 175px; max-width: 500px; margin: 0 auto; margin-bottom: 50px;}.textcontainer{width: 100%; min-width: 175px; max-width: 500px; margin: 0 auto; text-align: center; margin-top: 30px; margin-bottom: -15px;}.buttoncontainer{width: 100%; text-align: center; margin-top: 30px}.textboxcontainer{width: 100%; text-align: center; margin-top: 30px; color: #555555; font-size: 16px;}.btn{-webkit-border-radius: 30; -moz-border-radius: 30; border-radius: 30px; height: 30px;width: 50%; font-family: Arial; color: #555555; font-size: 16px; background: #dddddd; text-decoration: none; font-family: \"Trebuchet MS\", Helvetica, sans-serif; font-weight: bold; border:none;}.btn:active{color: #dddddd; background: #555555;}.textbox{-webkit-border-radius: 30; -moz-border-radius: 30; box-sizing: border-box; -moz-box-sizing: border-box;-webkit-box-sizing: border-box; border-radius: 30px; width: 100%; height: 30px; font-family: Arial; color: #555555; font-size: 16px; background: #dddddd; text-decoration: none; font-family: \"Trebuchet MS\", Helvetica, sans-serif; font-weight: bold; border:none; padding-left:15px; padding-right:15px;}.text{width: 100%; height: 30px; font-size: 30px; padding-left:10px; padding-right:10px;}.smalltext{width: 100%; height: 30px; font-size: 16px;}.disclaimer{width: 100%; font-size: 10px; z-index: 2000; bottom: 10px; text-align: center; color: #555555;}</style><script>function wifiInputValidation(){var ssid=document.getElementById(\"SSID\").value;var pw=document.getElementById(\"password\").value;var name=document.getElementById(\"name\").value;if ((ssid==\"\") || (pw==\"\") || (name==\"\")){alert('Please complete all the fields before saving.');return false;}if ((ssid.length > 32)){alert('SSID cannot be longer than 32 characters');return false;}if ((pw.length > 63)){alert('Password cannot be longer than 63 characters');return false;}if ((name.length > 16)){alert('Device name cannot be longer than 16 characters');return false;}return true;}function wifisave(){if(wifiInputValidation()){var ssid=document.getElementById(\"SSID\").value;var pw=document.getElementById(\"password\").value;var name=document.getElementById(\"name\").value;var xhr=new XMLHttpRequest();xhr.open('POST', 'wifisave?ssid=' + ssid + '&password=' + pw+ '&name=' + name);xhr.onload=function(){if (xhr.status===200){alert(\"WIFI settings saved and attempting to connect. Connect this device to your wireless network. When using an IOS device go to 'name of device'.local to control to the clock. When using another device use the discover application to find the clock on your network.\");}else{alert(\"ERROR - Please reset the clock and try again.\");}};xhr.send();}}</script></head><body><div class=\"propertycontainer\"><p>Connect to WLAN</p><div class=\"textboxcontainer\"> <input type=\"text\" class=\"textbox\" id=\"SSID\" placeholder=\"Enter SSID\"/> </div><div class=\"textboxcontainer\"> <input type=\"password\" class=\"textbox\" id=\"password\" placeholder=\"Enter PASSWORD\"/> </div><div class=\"textcontainer\"><span class=\"smalltext\" >Name of your device: </span></div><div class=\"textboxcontainer\"> <input type=\"text\" class=\"textbox\" id=\"name\" value=\"K2400\"/> </div><div class=\"buttoncontainer\"> <button class=\"btn\" onClick=\"wifisave()\" type=\"button\">SAVE</button> </div></div><div class=\"disclaimer\"><span>Copyright © 2018 | Velleman</span></div></body></html>"};
-const char HTML2[] PROGMEM = {"<!doctype html><html><head><meta name=\"apple-mobile-web-app-capable\" content=\"yes\"/><meta name=\"apple-mobile-web-app-status-bar-style\" content=\"black\"><meta name=\"format-detection\" content=\"telephone=no\"><meta name=\"viewport\" content=\"width=device-width, user-scalable=no, initial-scale=1.0\"><meta charset=\"utf-8\"><title>K2400 Clock</title><style>body{background-color: white; color: #555555; text-decoration: none; font-family: \"Trebuchet MS\", Helvetica, sans-serif; font-weight: bold;}p{color: #555555; text-indent: 10px; text-transform: uppercase; margin:50px 0px 0px 0px; font-size: 18px; padding-bottom: 10px;}.propertycontainersmall{width: 100%; min-width: 175px; max-width: 500px; margin: 0 auto;}.propertycontainer{width: 100%; min-width: 175px; max-width: 500px; margin: 0 auto; margin-bottom: 100px;}.slidecontainer{width: 100%;}.slidecontainersmall{width: 100%; text-align: center;}.buttoncontainer{width: 100%; text-align: center; margin-top: 30px}.textboxcontainer{width: 100%; text-align: center; margin-top: 30px; color: #555555; font-size: 16px;}.slider{width: 100%; -webkit-appearance: none; margin-top:30px;}.slider::-webkit-slider-runnable-track{background: #dddddd; border: none; height: 30px;border-radius: 15px;}.slider::-moz-range-track{background: #dddddd; border: none;height: 30px;border-radius: 15px;}.slider::-ms-track{background: #dddddd; border: none; height: 30px;border-radius: 15px; animate: 0.2s; border-color: transparent; color: transparent;}.slider::-ms-fill-lower{background: none;}.slider::-ms-fill-upper{background: none;}.white::-moz-range-thumb{-webkit-appearance: none;border: none;height: 30px;width: 30px;border-radius: 50%;background: #555555;}.red::-moz-range-thumb{-webkit-appearance: none;border: none;height: 30px;width: 30px;border-radius: 50%;background: #ff0000;}.green::-moz-range-thumb{-webkit-appearance: none;border: none;height: 30px;width: 30px;border-radius: 50%;background: #00ff00;}.blue::-moz-range-thumb{-webkit-appearance: none;border: none;height: 30px;width: 30px;border-radius: 50%;background: #0000ff;}.grey::-moz-range-thumb{-webkit-appearance: none;border: none;height: 30px;width: 30px;border-radius: 50%;background: #555555;}.white::-ms-thumb{-webkit-appearance: none;border: none;height: 30px;width: 30px;border-radius: 50%;background: #555555;}.red::-ms-thumb{-webkit-appearance: none;border: none;height: 30px;width: 30px;border-radius: 50%;background: #ff0000;}.green::-ms-thumb{-webkit-appearance: none;border: none;height: 30px;width: 30px;border-radius: 50%;background: #00ff00;}.blue::-ms-thumb{-webkit-appearance: none;border: none;height: 30px;width: 30px;border-radius: 50%;background: #0000ff;}.grey::-ms-thumb{-webkit-appearance: none;border: none;height: 30px;width: 30px;border-radius: 50%;background: #555555;}.white::-webkit-slider-thumb{-webkit-appearance: none;border: none;height: 30px;width: 30px;border-radius: 50%;background: #555555;}.red::-webkit-slider-thumb{-webkit-appearance: none;border: none;height: 30px;width: 30px;border-radius: 50%;background: #ff0000;}.green::-webkit-slider-thumb{-webkit-appearance: none;border: none;height: 30px;width: 30px;border-radius: 50%;background: #00ff00;}.blue::-webkit-slider-thumb{-webkit-appearance: none;border: none;height: 30px;width: 30px;border-radius: 50%;background: #0000ff;}.grey::-webkit-slider-thumb{-webkit-appearance: none;border: none;height: 30px;width: 30px;border-radius: 50%;background: #555555;}.btn{-webkit-border-radius: 30; -moz-border-radius: 30; border-radius: 30px; height: 30px;width: 50%; color: #555555; font-size: 16px; background: #dddddd; text-decoration: none; font-family: \"Trebuchet MS\", Helvetica, sans-serif; font-weight: bold; border:none;}.btn:active{color: #dddddd; background: #555555;}.textbox{-webkit-border-radius: 30; -moz-border-radius: 30; box-sizing: border-box; -moz-box-sizing: border-box;-webkit-box-sizing: border-box; border-radius: 30px; width: 100%; height: 30px; font-family: Arial; color: #555555; font-size: 16px; background: #dddddd; text-decoration: none; font-family: \"Trebuchet MS\", Helvetica, sans-serif; font-weight: bold; border:none; padding-left:15px; padding-right:15px;}.text{width: 100%; height: 30px; font-size: 30px; padding-left:1px; padding-right:1px;}.smalltext{width: 100%; height: 30px; font-size: 16px;}.disclaimer{width: 100%; font-size: 10px; z-index: 2000; bottom: 10px; position: fixed; padding-left: 30px; color: #555555;}/* HAMBURGER MENU */@media all and (-ms-high-contrast:none){html{display: flex;flex-direction: column;}}body{display: flex; flex-direction: row; flex-grow: 1; overflow-x: hidden; min-height: 100vh;}.sidebar{flex: 0 0 200px; order: -1; left: -200px; z-index: 2;}.textcontainer{text-align: center; margin-top: 30px; margin-bottom: -15px;flex: 1;}.clocktextcontainer{text-align: center; margin-top: 12px; margin-right: 60px;flex: 1;}nav{position: fixed; z-index: 1000; width: 200px; /*height: calc(100vh);*/ height: 100%; box-shadow: 0px 0px 20px 0px #dddddd; background-color: #fdfdfd;}.nav-hidden{box-shadow: none;}.content{flex: 1; min-width: 0; display: flex; flex-direction: column; flex-grow: 1;}.header{flex: 0 0 50px;}header{position: fixed; width: calc(100% - 200px); height: 57px; background-color: white; display: flex; flex-direction: row; flex-grow: 1;}.sidebar-hidden header{width: calc(100%);}main{flex: 1; margin-left: 40px; margin-right: 40px;}article{flex: 1; min-width: 0; margin-bottom:100px;}.sidebar-hidden .sidebar{margin-left: -200px;}.line{margin-top:5px; background-color:#555555; width:25px; height:3px; display:block; position:relative; opacity:1.0;}.nav-trigger{flex: 0 0 30px; z-index: 2; height: 30px; width: 30px; cursor: pointer; background-size: contain; margin: 15px;}/* Navigation Menu - Background */nav{list-style: none;}.nav-item{width: 200px;}.nav-item a{display: block; padding: 1em; color: #555555; font-size: 18px; text-decoration: none; font-family: \"Trebuchet MS\", Helvetica, sans-serif; font-weight: bold; text-transform: uppercase; transition: color 0.2s, background 0.5s;}.nav-item a:hover{color: #ffffff; background-color: #555555;}@media (max-width: 576px){.clocktextcontainer{display:none;}.sidebar-hidden .clocktextcontainer{display:inline;}}/* Micro reset */*,*:before,*:after{box-sizing:border-box;margin:0;padding:0;}html, body{height: 100%; width: 100%;}/* HAMBURGER MENU */</style><script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js\"></script><script>$(document).ready(function(){initLoadData(); $(\"input[type=range]\").mousedown(function(){sliderActive=true; console.log(\"mousedown\");}); $(\"input[type=range]\").mouseup(function(){sliderActive=false; console.log(\"mouseup\");}); $(\"input[type=range]\").keydown(function(){sliderActive=true; console.log(\"keydown\");}); $(\"input[type=range]\").keyup(function(){sliderActive=false; console.log(\"keyup\");}); $(\"input[type=range]\").on({'touchstart': function(){sliderActive=true; console.log(\"touchstart\");}}); $(\"input[type=range]\").on({'touchend': function(){sliderActive=false; console.log(\"touchend\");}}); $('.nav-item a').on('click', function(){var target=$(this).attr('rel'); $(\"#\" + target).show().siblings(\"div\").hide();}); $(\".nav-trigger\").click(function(){$(\"body\").toggleClass(\"sidebar-hidden\");$(\"nav\").toggleClass(\"nav-hidden\");}); $(\".nav-item:first a\").click();$(\".nav-item a\").click(function(){if ($(window).width() < 576){$(\"body\").toggleClass(\"sidebar-hidden\");$(\"nav\").toggleClass(\"nav-hidden\");}});if ($(window).width() < 576){$(\"body\").toggleClass(\"sidebar-hidden\");$(\"nav\").toggleClass(\"nav-hidden\");}});var sliderActive=false; window.setInterval(function(){if (!sliderActive){loadData();}}, 1000);function initLoadData(){$.post(\"data\", function (data, status){var jsonData=data; $(\"#brightness\").val(jsonData.brightness);$(\"#hourRed\").val(jsonData.hourRed);$(\"#hourGreen\").val(jsonData.hourGreen);$(\"#hourBlue\").val(jsonData.hourBlue);$(\"#minuteRed\").val(jsonData.minuteRed);$(\"#minuteGreen\").val(jsonData.minuteGreen);$(\"#minuteBlue\").val(jsonData.minuteBlue);$(\"#secondRed\").val(jsonData.secondRed);$(\"#secondGreen\").val(jsonData.secondGreen);$(\"#secondBlue\").val(jsonData.secondBlue);$(\"#pendRed\").val(jsonData.pendRed);$(\"#pendGreen\").val(jsonData.pendGreen);$(\"#pendBlue\").val(jsonData.pendBlue);$(\"#minRed\").val(jsonData.minRed);$(\"#minGreen\").val(jsonData.minGreen);$(\"#minBlue\").val(jsonData.minBlue);$(\"#quarterRed\").val(jsonData.quarterRed);$(\"#quarterGreen\").val(jsonData.quarterGreen);$(\"#quarterBlue\").val(jsonData.quarterBlue);$(\"#mode\").val(jsonData.mode);$(\"#invert\").val(jsonData.invert);$(\"#hour\").text(jsonData.hour);$(\"#min\").text(jsonData.min);$(\"#sec\").text(jsonData.sec);$(\"#hour\").text(jsonData.hour);$(\"#min\").text(jsonData.min);$(\"#sec\").text(jsonData.sec);$(\"#NTPtextbox\").val(jsonData.NTP);$(\"#GMTtextbox\").val(jsonData.GMT);$(\"#DSTtextbox\").val(jsonData.DST);$(\"#devicename\").val(jsonData.devicename);$(\"#alarmOn\").val(jsonData.alarmOn);$(\"#minAlarm\").val(jsonData.minAlarm);$(\"#hourAlarm\").val(jsonData.hourAlarm);$(\"#dimOn\").val(jsonData.dimOn);$(\"#hourStartDim\").val(jsonData.hourStartDim);$(\"#hourStopDim\").val(jsonData.hourStopDim);$(\"#valueDim\").val(jsonData.valueDim);});}function loadData(){$.post(\"data\", function (data, status){var jsonData=data; $(\"#brightness\").val(jsonData.brightness);$(\"#hourRed\").val(jsonData.hourRed);$(\"#hourGreen\").val(jsonData.hourGreen);$(\"#hourBlue\").val(jsonData.hourBlue);$(\"#minuteRed\").val(jsonData.minuteRed);$(\"#minuteGreen\").val(jsonData.minuteGreen);$(\"#minuteBlue\").val(jsonData.minuteBlue);$(\"#secondRed\").val(jsonData.secondRed);$(\"#secondGreen\").val(jsonData.secondGreen);$(\"#secondBlue\").val(jsonData.secondBlue);$(\"#pendRed\").val(jsonData.pendRed);$(\"#pendGreen\").val(jsonData.pendGreen);$(\"#pendBlue\").val(jsonData.pendBlue);$(\"#minRed\").val(jsonData.minRed);$(\"#minGreen\").val(jsonData.minGreen);$(\"#minBlue\").val(jsonData.minBlue);$(\"#quarterRed\").val(jsonData.quarterRed);$(\"#quarterGreen\").val(jsonData.quarterGreen);$(\"#quarterBlue\").val(jsonData.quarterBlue);$(\"#mode\").val(jsonData.mode);$(\"#invert\").val(jsonData.invert);$(\"#hour\").text(jsonData.hour);$(\"#min\").text(jsonData.min);$(\"#sec\").text(jsonData.sec);$(\"#hour\").text(jsonData.hour);$(\"#min\").text(jsonData.min);$(\"#sec\").text(jsonData.sec);});}function ntpreset(){$.post(\"ntpreset\", function(data, status){if(status==\"success\"){alert(\"NTP settings reset\");}else{alert(\"ERROR\");}});$('#NTPtextbox').val('time.google.com');$('#GMTtextbox').val('0'); $('#DSTtextbox').val('0');/*initLoadData();*/}function NTPInputValidation(){if (($('#NTPtextbox').val()==\"\") || ($('#GMTtextbox').val()==\"\") || ($('#DSTtextbox').val()==\"\")){alert('Please complete all the fields before saving.');return false;}if ((parseFloat($('#GMTtextbox').val()) > 23) || (parseFloat($('#GMTtextbox').val()) < -23)){alert('GMT offset cannot be smaller than -23 or bigger than 23');return false;}if ((parseFloat($('#DSTtextbox').val()) > 23) || (parseFloat($('#DSTtextbox').val()) < -23)){alert('DST offset cannot be smaller than -23 or bigger than 23');return false;}return true;}function ntpsave(){if (NTPInputValidation()){$.post(\"ntpsave\",{NTP: $(\"#NTPtextbox\").val(),GMT: $(\"#GMTtextbox\").val(),DST: $(\"#DSTtextbox\").val()},function(data, status){if(status==\"success\"){alert(\"NTP settings saved\");}else{alert(\"ERROR\");}}); /*initLoadData();*/}}function wifiInputValidation(){if (($('#SSID').val()==\"\") || ($('#password').val()==\"\") || ($('#devicename').val()==\"\")){alert('Please complete all the fields before saving.');return false;}if (($('#SSID').val().length > 32)){alert('SSID cannot be longer than 32 characters');return false;}if (($('#password').val().length > 63)){alert('Password cannot be longer than 63 characters');return false;}if (($('#devicename').val().length > 16)){alert('Device name cannot be longer than 16 characters');return false;}var str=$('#devicename').val();if (str.includes(\" \")){alert('Device name cannot contains spaces');return false;}return true;}function wifisave(){if (wifiInputValidation()){$.post(\"wifisave\",{SSID: $(\"#SSID\").val(),password: $(\"#password\").val(),devicename: $(\"#devicename\").val()},function(data, status){if(status==\"success\"){alert(\"WLAN settings saved\");}else{alert(\"ERROR\");}});$('#SSID').val('');$('#password').val('');}}function wifireset(){$.post(\"wifireset\", function(data, status){if(status==\"success\"){alert(\"WLAN settings reset\");}else{alert(\"ERROR\");}});$('#SSID').val('');$('#password').val(''); $('#devicename').val('K2400');/*initLoadData();*/}function alarmInputValidation(){if (($('#hourAlarm').val()==\"\") || ($('#minAlarm').val()==\"\")){alert('Please complete all the fields before saving.');return false;}if((parseInt($('#hourAlarm').val()) < 0) || (parseInt($('#hourAlarm').val()) > 23)){alert('Alarm hour cannot be smaller than 0 or larger than 23.');return false;}if((parseInt($('#minAlarm').val()) < 0) || (parseInt($('#minAlarm').val()) > 59)){alert('Alarm minutes cannot be smaller than 0 or larger than 59.');return false;}return true;}function alarmsave(){if (alarmInputValidation()){$.post(\"alarmsave\",{alarmOn:$(\"#alarmOn\").val(),hourAlarm: $(\"#hourAlarm\").val(),minAlarm: $(\"#minAlarm\").val()},function(data, status){if(status==\"success\"){alert(\"Alarm settings saved\");}else{alert(\"ERROR\");}});}}function alarmreset(){$.post(\"alarmreset\", function(data, status){if(status==\"success\"){alert(\"Alarm settings reset\");}else{alert(\"ERROR\");}});$('#alarmOn').val('0');$('#hourAlarm').val('');$('#minAlarm').val('');/*initLoadData();*/}function dimInputValidation(){if (($('#hourStartDim').val()==\"\") || ($('#hourStopDim').val()==\"\") || ($('#valueDim').val()==\"\")){alert('Please complete all the fields before saving.');return false;}if((parseInt($('#hourStartDim').val()) < 0) || (parseInt($('#hourStartDim').val()) > 23)){alert('Start hour cannot be smaller than 0 or larger than 23.');return false;}if((parseInt($('#hourStopDim').val()) < 0) || (parseInt($('#hourStopDim').val()) > 23)){alert('Stop hour cannot be smaller than 0 or larger than 23.');return false;}return true;}function dimsave(){if (dimInputValidation()){$.post(\"dimsave\",{dimOn:$(\"#dimOn\").val(),hourStartDim:$(\"#hourStartDim\").val(),hourStopDim: $(\"#hourStopDim\").val(),valueDim: $(\"#valueDim\").val()},function(data, status){if(status==\"success\"){alert(\"Dim settings saved\");}else{alert(\"ERROR\");}});}}function dimreset(){$.post(\"dimreset\", function(data, status){if(status==\"success\"){alert(\"Dim settings reset\");}else{alert(\"ERROR\");}});$('#dimOn').val('0');$('#hourStartDim').val('');$('#hourStopDim').val('');$('#valueDim').val('128');/*initLoadData();*/}function globalrestart(){$.post(\"globalrestart\", function(data, status){if(status==\"success\"){alert(\"Device restarting\");}else{alert(\"ERROR\");}});}function globalreset(){$.post(\"globalreset\", function(data, status){if(status==\"success\"){alert(\"Factory defaults restored\");}else{alert(\"ERROR\");}});}function colorsave(){$.post(\"colorsave\", function (data, status){});}function colorload(){$.post(\"colorload\", function (data, status){});}function colorreset(){$.post(\"colorreset\", function (data, status){});}function update(){$.post(\"data\",{brightness: $(\"#brightness\").val(),hourRed: $(\"#hourRed\").val(),hourGreen: $(\"#hourGreen\").val(),hourBlue: $(\"#hourBlue\").val(),minuteRed: $(\"#minuteRed\").val(),minuteGreen: $(\"#minuteGreen\").val(),minuteBlue: $(\"#minuteBlue\").val(),secondRed: $(\"#secondRed\").val(),secondGreen: $(\"#secondGreen\").val(),secondBlue: $(\"#secondBlue\").val(),pendRed: $(\"#pendRed\").val(),pendGreen: $(\"#pendGreen\").val(),pendBlue: $(\"#pendBlue\").val(),minRed: $(\"#minRed\").val(),minGreen: $(\"#minGreen\").val(),minBlue: $(\"#minBlue\").val(),quarterRed: $(\"#quarterRed\").val(),quarterGreen: $(\"#quarterGreen\").val(),quarterBlue: $(\"#quarterBlue\").val(),mode: $(\"#mode\").val(),invert: $(\"#invert\").val()}, function(data, status){});}</script></head><body> <div class=\"sidebar\"> <nav> <li class=\"nav-item\"><a href=\"#\" rel=\"section1\">Color Settings</a></li><li class=\"nav-item\"><a href=\"#\" rel=\"section2\">Time Settings</a></li><li class=\"nav-item\"><a href=\"#\" rel=\"section3\">WLAN Settings</a></li><li class=\"nav-item\"><a href=\"#\" rel=\"section4\">Device Settings</a></li></nav> <span class=\"disclaimer\">Copyright © 2018 | Velleman</span> </div><div class=\"content\"> <div class=\"header\"><header> <span class=\"nav-trigger\"> <span> <span class=\"line\"></span> <span class=\"line\"></span> <span class=\"line\"></span> </span> </span> <span class=\"clocktextcontainer\"> <span class=\"text\" id=\"hour\">00</span> <span class=\"text\">:</span> <span class=\"text\" id=\"min\">00</span> <span class=\"text\">:</span> <span class=\"text\" id=\"sec\">00</span> </span> </header> </div><main> <article> <div id=\"section1\"> <div class=\"propertycontainersmall\"> <p>Brightness</p><div class=\"slidecontainer\"> <input type=\"range\" min=\"0\" max=\"255\" value=\"128\" class=\"slider white\" id=\"brightness\" onChange=\"update()\"> </div></div><div class=\"propertycontainer\"> <p>Display mode</p><div class=\"slidecontainer\"> <input type=\"range\" min=\"0\" max=\"8\" value=\"0\" class=\"slider white\" id=\"mode\" onChange=\"update()\"> </div></div><div class=\"propertycontainersmall\"> <p>Hour hand</p><div class=\"slidecontainer\"> <input type=\"range\" min=\"0\" max=\"255\" value=\"128\" class=\"slider red\" id=\"hourRed\" onChange=\"update()\"> </div><div class=\"slidecontainer\"> <input type=\"range\" min=\"0\" max=\"255\" value=\"128\" class=\"slider green\" id=\"hourGreen\" onChange=\"update()\"> </div><div class=\"slidecontainer\"> <input type=\"range\" min=\"0\" max=\"255\" value=\"128\" class=\"slider blue\" id=\"hourBlue\" onChange=\"update()\"> </div></div><div class=\"propertycontainersmall\"> <p>Minute hand</p><div class=\"slidecontainer\"> <input type=\"range\" min=\"0\" max=\"255\" value=\"128\" class=\"slider red\" id=\"minuteRed\" onChange=\"update()\"> </div><div class=\"slidecontainer\"> <input type=\"range\" min=\"0\" max=\"255\" value=\"128\" class=\"slider green\" id=\"minuteGreen\" onChange=\"update()\"> </div><div class=\"slidecontainer\"> <input type=\"range\" min=\"0\" max=\"255\" value=\"128\" class=\"slider blue\" id=\"minuteBlue\" onChange=\"update()\"> </div></div><div class=\"propertycontainersmall\"> <p>Second hand</p><div class=\"slidecontainer\"> <input type=\"range\" min=\"0\" max=\"255\" value=\"128\" class=\"slider red\" id=\"secondRed\" onChange=\"update()\"> </div><div class=\"slidecontainer\"> <input type=\"range\" min=\"0\" max=\"255\" value=\"128\" class=\"slider green\" id=\"secondGreen\" onChange=\"update()\"> </div><div class=\"slidecontainer\"> <input type=\"range\" min=\"0\" max=\"255\" value=\"128\" class=\"slider blue\" id=\"secondBlue\" onChange=\"update()\"> </div></div><div class=\"propertycontainersmall\"> <p>Pendulum</p><div class=\"slidecontainer\"> <input type=\"range\" min=\"0\" max=\"255\" value=\"128\" class=\"slider red\" id=\"pendRed\" onChange=\"update()\"> </div><div class=\"slidecontainer\"> <input type=\"range\" min=\"0\" max=\"255\" value=\"128\" class=\"slider green\" id=\"pendGreen\" onChange=\"update()\"> </div><div class=\"slidecontainer\"> <input type=\"range\" min=\"0\" max=\"255\" value=\"128\" class=\"slider blue\" id=\"pendBlue\" onChange=\"update()\"> </div></div><div class=\"propertycontainersmall\"> <p>5 Minute Marks</p><div class=\"slidecontainer\"> <input type=\"range\" min=\"0\" max=\"255\" value=\"128\" class=\"slider red\" id=\"minRed\" onChange=\"update()\"> </div><div class=\"slidecontainer\"> <input type=\"range\" min=\"0\" max=\"255\" value=\"128\" class=\"slider green\" id=\"minGreen\" onChange=\"update()\"> </div><div class=\"slidecontainer\"> <input type=\"range\" min=\"0\" max=\"255\" value=\"128\" class=\"slider blue\" id=\"minBlue\" onChange=\"update()\"> </div></div><div class=\"propertycontainersmall\"> <p>15 Minute Marks</p><div class=\"slidecontainer\"> <input type=\"range\" min=\"0\" max=\"255\" value=\"128\" class=\"slider red\" id=\"quarterRed\" onChange=\"update()\"> </div><div class=\"slidecontainer\"> <input type=\"range\" min=\"0\" max=\"255\" value=\"128\" class=\"slider green\" id=\"quarterGreen\" onChange=\"update()\"> </div><div class=\"slidecontainer\"> <input type=\"range\" min=\"0\" max=\"255\" value=\"128\" class=\"slider blue\" id=\"quarterBlue\" onChange=\"update()\"> </div></div><div class=\"propertycontainersmall\"> <p>Invert colors</p><div class=\"textcontainer\"> <span class=\"smalltext\" >OFF/ON</span> </div><div class=\"slidecontainersmall\"> <input type=\"range\" style=\"width:25%;\" min=\"0\" max=\"1\" value=\"0\" class=\"slider grey\" id=\"invert\" onChange=\"update()\"> </div></div><div class=\"propertycontainer\"> <p>Color Settings</p><div class=\"buttoncontainer\"> <button class=\"btn\" onClick=\"colorsave()\" type=\"button\">SAVE</button> </div><div class=\"buttoncontainer\"> <button class=\"btn\" onClick=\"colorload()\" type=\"button\">LOAD</button> </div><div class=\"buttoncontainer\"> <button class=\"btn\" onClick=\"colorreset()\" type=\"button\">RESET</button> </div></div></div><div id=\"section2\"> <div class=\"propertycontainer\"> <p>NTP server</p><div class=\"textcontainer\"> <span class=\"smalltext\" >NTP server: </span> </div><div class=\"textboxcontainer\"> <input type=\"text\" class=\"textbox\" id=\"NTPtextbox\" placeholder=\"Enter new NTP server here\"/> </div><div class=\"textcontainer\"> <span class=\"smalltext\" >GMT offset (hours): </span> </div><div class=\"textboxcontainer\"> <input type=\"number\" pattern=\"[0-9]+\" class=\"textbox\" id=\"GMTtextbox\" placeholder=\"Enter GMT offset (hours)\"/> </div><div class=\"textcontainer\"> <span class=\"smalltext\" >DST offset (hours): </span> </div><div class=\"textboxcontainer\"> <input type=\"number\" pattern=\"[0-9]+\" class=\"textbox\" id=\"DSTtextbox\" placeholder=\"Enter DST offset (hours)\"/> </div><div class=\"buttoncontainer\"> <button class=\"btn\" onClick=\"ntpsave()\" type=\"button\">SAVE</button> </div><div class=\"buttoncontainer\"> <button class=\"btn\" onClick=\"ntpreset()\" type=\"button\">RESET</button> </div></div><div class=\"propertycontainer\"> <p>Alarm</p><div class=\"textcontainer\"> <span class=\"smalltext\" >Hour: </span> </div><div class=\"textboxcontainer\"> <input type=\"number\" pattern=\"[0-9]+\" class=\"textbox\" id=\"hourAlarm\" placeholder=\"Enter hour\"/> </div><div class=\"textcontainer\"> <span class=\"smalltext\" >Minutes: </span> </div><div class=\"textboxcontainer\"> <input type=\"number\" pattern=\"[0-9]+\" class=\"textbox\" id=\"minAlarm\" placeholder=\"Enter minutes\"/> </div><div class=\"textcontainer\"> <span class=\"smalltext\" >Alarm OFF/ON</span> </div><div class=\"slidecontainersmall\"> <input type=\"range\" style=\"width:25%;\" min=\"0\" max=\"1\" value=\"0\" class=\"slider grey\" id=\"alarmOn\"> </div><div class=\"buttoncontainer\"> <button class=\"btn\" onClick=\"alarmsave()\" type=\"button\">SAVE</button> </div><div class=\"buttoncontainer\"> <button class=\"btn\" onClick=\"alarmreset()\" type=\"button\">RESET</button> </div></div><div class=\"propertycontainer\"> <p>Auto Dimming</p><div class=\"textcontainer\"> <span class=\"smalltext\" >Start dimming at: (hour) </span> </div><div class=\"textboxcontainer\"> <input type=\"number\" pattern=\"[0-9]+\" class=\"textbox\" id=\"hourStartDim\" placeholder=\"Enter hour\"/> </div><div class=\"textcontainer\"> <span class=\"smalltext\" >Stop dimming at: (hour) </span> </div><div class=\"textboxcontainer\"> <input type=\"number\" pattern=\"[0-9]+\" class=\"textbox\" id=\"hourStopDim\" placeholder=\"Enter hour\"/> </div><div class=\"textcontainer\"> <span class=\"smalltext\" >Dim to: </span> </div><div class=\"slidecontainer\"> <input type=\"range\" min=\"0\" max=\"255\" value=\"128\" class=\"slider white\" id=\"valueDim\"> </div><div class=\"textcontainer\"> <span class=\"smalltext\" >Auto Dimming OFF/ON</span> </div><div class=\"slidecontainersmall\"> <input type=\"range\" style=\"width:25%;\" min=\"0\" max=\"1\" value=\"0\" class=\"slider grey\" id=\"dimOn\"> </div><div class=\"buttoncontainer\"> <button class=\"btn\" onClick=\"dimsave()\" type=\"button\">SAVE</button> </div><div class=\"buttoncontainer\"> <button class=\"btn\" onClick=\"dimreset()\" type=\"button\">RESET</button> </div></div></div><div id=\"section3\"> <div class=\"propertycontainer\"> <p>WLAN Settings</p><div class=\"textcontainer\"> <span class=\"smalltext\" >WLAN settings:</span> </div><div class=\"textboxcontainer\"> <input type=\"text\" class=\"textbox\" id=\"SSID\" placeholder=\"Enter SSID\"/> </div><div class=\"textboxcontainer\"> <input type=\"password\" class=\"textbox\" id=\"password\" placeholder=\"Enter PASSWORD\"/> </div><div class=\"textcontainer\"> <span class=\"smalltext\" >Name of your device: </span> </div><div class=\"textboxcontainer\"> <input type=\"text\" class=\"textbox\" id=\"devicename\"/> </div><div class=\"buttoncontainer\"> <button class=\"btn\" onClick=\"wifisave()\" type=\"button\">SAVE</button> </div><div class=\"buttoncontainer\"> <button class=\"btn\" onClick=\"wifireset()\" type=\"button\">RESET</button> </div></div></div><div id=\"section4\"><div class=\"propertycontainersmall\"> <p>Device Restart</p><div class=\"buttoncontainer\"> <button class=\"btn\" onClick=\"globalrestart()\" type=\"button\">RESTART</button> </div></div><div class=\"propertycontainer\"> <p>Factory Defaults</p><div class=\"buttoncontainer\"> <button class=\"btn\" onClick=\"globalreset()\" type=\"button\">RESET</button> </div></div></div></article> </main> </div></body></html>"};
+const char HTML2[] PROGMEM = {"<!doctype html> \ 
+  <html> \ 
+  <head> \ 
+  <meta name=\"apple-mobile-web-app-capable\" content=\"yes\"/> \
+    <meta name=\"apple-mobile-web-app-status-bar-style\" content=\"black\"> \
+    <meta name=\"format-detection\" content=\"telephone=no\"> \
+    <meta name=\"viewport\" content=\"width=device-width, user-scalable=no, initial-scale=1.0\"> \ 
+  <meta charset=\"utf-8\"> \ 
+  <title>K2400 Clock</title> \ 
+<style>body{background-color: white; color: #555555; text-decoration: none; font-family: \"Trebuchet MS\", Helvetica, sans-serif; font-weight: bold;}p{color: #555555; text-indent: 10px; text-transform: uppercase; margin:50px 0px 0px 0px; font-size: 18px; padding-bottom: 10px;} \ 
+.propertycontainersmall{width: 100%; min-width: 175px; max-width: 500px; margin: 0 auto;} \ 
+.propertycontainer{width: 100%; min-width: 175px; max-width: 500px; margin: 0 auto; margin-bottom: 100px;} \ 
+.slidecontainer{width: 100%;} \ 
+.slidecontainersmall{width: 100%; text-align: center;} \ 
+.buttoncontainer{width: 100%; text-align: center; margin-top: 30px} \ 
+.textboxcontainer{width: 100%; text-align: center; margin-top: 30px; color: #555555; font-size: 16px;} \ 
+.slider{width: 100%; -webkit-appearance: none; margin-top:30px;} \ 
+.slider::-webkit-slider-runnable-track{background: #dddddd; border: none; height: 30px;border-radius: 15px;} \ 
+.slider::-moz-range-track{background: #dddddd; border: none;height: 30px;border-radius: 15px;} \ 
+.slider::-ms-track{background: #dddddd; border: none; height: 30px;border-radius: 15px; animate: 0.2s; border-color: transparent; color: transparent;} \ 
+.slider::-ms-fill-lower{background: none;} \ 
+.slider::-ms-fill-upper{background: none;} \ 
+.white::-moz-range-thumb{-webkit-appearance: none;border: none;height: 30px;width: 30px;border-radius: 50%;background: #555555;} \ 
+.red::-moz-range-thumb{-webkit-appearance: none;border: none;height: 30px;width: 30px;border-radius: 50%;background: #ff0000;} \ 
+.green::-moz-range-thumb{-webkit-appearance: none;border: none;height: 30px;width: 30px;border-radius: 50%;background: #00ff00;} \ 
+.blue::-moz-range-thumb{-webkit-appearance: none;border: none;height: 30px;width: 30px;border-radius: 50%;background: #0000ff;} \ 
+.grey::-moz-range-thumb{-webkit-appearance: none;border: none;height: 30px;width: 30px;border-radius: 50%;background: #555555;} \ 
+.white::-ms-thumb{-webkit-appearance: none;border: none;height: 30px;width: 30px;border-radius: 50%;background: #555555;} \ 
+.red::-ms-thumb{-webkit-appearance: none;border: none;height: 30px;width: 30px;border-radius: 50%;background: #ff0000;} \ 
+.green::-ms-thumb{-webkit-appearance: none;border: none;height: 30px;width: 30px;border-radius: 50%;background: #00ff00;} \ 
+.blue::-ms-thumb{-webkit-appearance: none;border: none;height: 30px;width: 30px;border-radius: 50%;background: #0000ff;} \ 
+.grey::-ms-thumb{-webkit-appearance: none;border: none;height: 30px;width: 30px;border-radius: 50%;background: #555555;} \ 
+.white::-webkit-slider-thumb{-webkit-appearance: none;border: none;height: 30px;width: 30px;border-radius: 50%;background: #555555;} \ 
+.red::-webkit-slider-thumb{-webkit-appearance: none;border: none;height: 30px;width: 30px;border-radius: 50%;background: #ff0000;} \ 
+.green::-webkit-slider-thumb{-webkit-appearance: none;border: none;height: 30px;width: 30px;border-radius: 50%;background: #00ff00;} \ 
+.blue::-webkit-slider-thumb{-webkit-appearance: none;border: none;height: 30px;width: 30px;border-radius: 50%;background: #0000ff;} \ 
+.grey::-webkit-slider-thumb{-webkit-appearance: none;border: none;height: 30px;width: 30px;border-radius: 50%;background: #555555;} \ 
+.btn{-webkit-border-radius: 30; -moz-border-radius: 30; border-radius: 30px; height: 30px;width: 50%; color: #555555; font-size: 16px; background: #dddddd; text-decoration: none; font-family: \"Trebuchet MS\", Helvetica, sans-serif; font-weight: bold; border:none;} \ 
+.btn:active{color: #dddddd; background: #555555;} \ 
+.textbox{-webkit-border-radius: 30; -moz-border-radius: 30; box-sizing: border-box; -moz-box-sizing: border-box;-webkit-box-sizing: border-box; border-radius: 30px; width: 100%; height: 30px; font-family: Arial; color: #555555; font-size: 16px; background: #dddddd; text-decoration: none; font-family: \"Trebuchet MS\", Helvetica, sans-serif; font-weight: bold; border:none; padding-left:15px; padding-right:15px;} \ 
+.text{width: 100%; height: 30px; font-size: 30px; padding-left:1px; padding-right:1px;} \ 
+.smalltext{width: 100%; height: 30px; font-size: 16px;} \ 
+.disclaimer{width: 100%; font-size: 10px; z-index: 2000; bottom: 10px; position: fixed; padding-left: 30px; color: #555555;}/* HAMBURGER MENU */@media all and (-ms-high-contrast:none){html{display: flex;flex-direction: column;}}body{display: flex; flex-direction: row; flex-grow: 1; overflow-x: hidden; min-height: 100vh;} \ 
+.sidebar{flex: 0 0 200px; order: -1; left: -200px; z-index: 2;} \ 
+.textcontainer{text-align: center; margin-top: 30px; margin-bottom: -15px;flex: 1;} \ 
+.clocktextcontainer{text-align: center; margin-top: 12px; margin-right: 60px;flex: 1;}nav{position: fixed; z-index: 1000; width: 200px; /*height: calc(100vh);*/ height: 100%; box-shadow: 0px 0px 20px 0px #dddddd; background-color: #fdfdfd;} \ 
+.nav-hidden{box-shadow: none;} \ 
+.content{flex: 1; min-width: 0; display: flex; flex-direction: column; flex-grow: 1;} \ 
+.header{flex: 0 0 50px;}header{position: fixed; width: calc(100% - 200px); height: 57px; background-color: white; display: flex; flex-direction: row; flex-grow: 1;} \ 
+.sidebar-hidden header{width: calc(100%);}main{flex: 1; margin-left: 40px; margin-right: 40px;}article{flex: 1; min-width: 0; margin-bottom:100px;} \ 
+.sidebar-hidden .sidebar{margin-left: -200px;} \ 
+.line{margin-top:5px; background-color:#555555; width:25px; height:3px; display:block; position:relative; opacity:1.0;} \ 
+.nav-trigger{flex: 0 0 30px; z-index: 2; height: 30px; width: 30px; cursor: pointer; background-size: contain; margin: 15px;}/* Navigation Menu - Background */nav{list-style: none;} \ 
+.nav-item{width: 200px;} \ 
+.nav-item a{display: block; padding: 1em; color: #555555; font-size: 18px; text-decoration: none; font-family: \"Trebuchet MS\", Helvetica, sans-serif; font-weight: bold; text-transform: uppercase; transition: color 0.2s, background 0.5s;} \ 
+.nav-item a:hover{color: #ffffff; background-color: #555555;}@media (max-width: 576px){.clocktextcontainer{display:none;} \ 
+.sidebar-hidden .clocktextcontainer{display:inline;}}/* Micro reset */*,*:before,*:after{box-sizing:border-box;margin:0;padding:0;}html, body{height: 100%; width: 100%;}/* HAMBURGER MENU */</style> \ 
+  <script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js\"> \ 
+  </script> \ 
+  <script>$(document).ready(function(){initLoadData(); $(\"input[type=range]\").mousedown(function(){sliderActive=true; console.log(\"mousedown\");}); $(\"input[type=range]\").mouseup(function(){sliderActive=false; console.log(\"mouseup\");}); $(\"input[type=range]\").keydown(function(){sliderActive=true; console.log(\"keydown\");}); $(\"input[type=range]\").keyup(function(){sliderActive=false; console.log(\"keyup\");}); $(\"input[type=range]\").on({'touchstart': function(){sliderActive=true; console.log(\"touchstart\");}}); $(\"input[type=range]\").on({'touchend': function(){sliderActive=false; console.log(\"touchend\");}}); $('.nav-item a').on('click', function(){var target=$(this).attr('rel'); $(\"#\" + target).show().siblings(\"div\").hide();}); $(\".nav-trigger\").click(function(){$(\"body\").toggleClass(\"sidebar-hidden\");$(\"nav\").toggleClass(\"nav-hidden\");}); $(\".nav-item:first a\").click();$(\".nav-item a\").click(function(){if ($(window).width() < 576){$(\"body\").toggleClass(\"sidebar-hidden\");$(\"nav\").toggleClass(\"nav-hidden\");}});if ($(window).width() < 576){$(\"body\").toggleClass(\"sidebar-hidden\");$(\"nav\").toggleClass(\"nav-hidden\");}});var sliderActive=false; window.setInterval(function(){if (!sliderActive){loadData();}}, 1000);function initLoadData(){$.post(\"data\", function (data, status){var jsonData=data; $(\"#brightness\").val(jsonData.brightness);$(\"#hourRed\").val(jsonData.hourRed);$(\"#hourGreen\").val(jsonData.hourGreen);$(\"#hourBlue\").val(jsonData.hourBlue);$(\"#minuteRed\").val(jsonData.minuteRed);$(\"#minuteGreen\").val(jsonData.minuteGreen);$(\"#minuteBlue\").val(jsonData.minuteBlue);$(\"#secondRed\").val(jsonData.secondRed);$(\"#secondGreen\").val(jsonData.secondGreen);$(\"#secondBlue\").val(jsonData.secondBlue);$(\"#pendRed\").val(jsonData.pendRed);$(\"#pendGreen\").val(jsonData.pendGreen);$(\"#pendBlue\").val(jsonData.pendBlue);$(\"#minRed\").val(jsonData.minRed);$(\"#minGreen\").val(jsonData.minGreen);$(\"#minBlue\").val(jsonData.minBlue);$(\"#quarterRed\").val(jsonData.quarterRed);$(\"#quarterGreen\").val(jsonData.quarterGreen);$(\"#quarterBlue\").val(jsonData.quarterBlue);$(\"#mode\").val(jsonData.mode);$(\"#invert\").val(jsonData.invert);$(\"#hour\").text(jsonData.hour);$(\"#min\").text(jsonData.min);$(\"#sec\").text(jsonData.sec);$(\"#hour\").text(jsonData.hour);$(\"#min\").text(jsonData.min);$(\"#sec\").text(jsonData.sec); \
+  $(\"#NTPtextbox\").val(jsonData.NTP); \
+  $(\"#NTPtztextbox\").val(jsonData.NTPtzString); \
+  $(\"#GMTtextbox\").val(jsonData.GMT); \
+  $(\"#DSTtextbox\").val(jsonData.DST); \
+  $(\"#devicename\").val(jsonData.devicename);$(\"#alarmOn\").val(jsonData.alarmOn);$(\"#minAlarm\").val(jsonData.minAlarm);$(\"#hourAlarm\").val(jsonData.hourAlarm);$(\"#dimOn\").val(jsonData.dimOn);$(\"#hourStartDim\").val(jsonData.hourStartDim);$(\"#hourStopDim\").val(jsonData.hourStopDim);$(\"#valueDim\").val(jsonData.valueDim);});}function loadData(){$.post(\"data\", function (data, status){var jsonData=data; $(\"#brightness\").val(jsonData.brightness);$(\"#hourRed\").val(jsonData.hourRed);$(\"#hourGreen\").val(jsonData.hourGreen);$(\"#hourBlue\").val(jsonData.hourBlue);$(\"#minuteRed\").val(jsonData.minuteRed);$(\"#minuteGreen\").val(jsonData.minuteGreen);$(\"#minuteBlue\").val(jsonData.minuteBlue);$(\"#secondRed\").val(jsonData.secondRed);$(\"#secondGreen\").val(jsonData.secondGreen);$(\"#secondBlue\").val(jsonData.secondBlue);$(\"#pendRed\").val(jsonData.pendRed);$(\"#pendGreen\").val(jsonData.pendGreen);$(\"#pendBlue\").val(jsonData.pendBlue);$(\"#minRed\").val(jsonData.minRed);$(\"#minGreen\").val(jsonData.minGreen);$(\"#minBlue\").val(jsonData.minBlue);$(\"#quarterRed\").val(jsonData.quarterRed);$(\"#quarterGreen\").val(jsonData.quarterGreen);$(\"#quarterBlue\").val(jsonData.quarterBlue);$(\"#mode\").val(jsonData.mode);$(\"#invert\").val(jsonData.invert);$(\"#hour\").text(jsonData.hour);$(\"#min\").text(jsonData.min);$(\"#sec\").text(jsonData.sec);$(\"#hour\").text(jsonData.hour);$(\"#min\").text(jsonData.min);$(\"#sec\").text(jsonData.sec);});} \
+  function ntpreset(){ \
+    $.post(\"ntpreset\", function(data, status){if(status==\"success\"){alert(\"NTP settings reset\");}else{alert(\"ERROR\");}}); \
+    $('#NTPtextbox').val('time.google.com'); \
+    $('#NTPtztextbox').val('CET-1CEST,M3.5.0/2,M10.5.0/3'); \
+    $('#GMTtextbox').val('0'); \
+    $('#DSTtextbox').val('0');/*initLoadData();*/} \
+  function NTPInputValidation(){ \
+    if (($('#NTPtextbox').val()==\"\") || ($('#GMTtextbox').val()==\"\") || ($('#DSTtextbox').val()==\"\")){ \
+      alert('Please complete all the fields before saving.');return false;} \
+    if ((parseFloat($('#GMTtextbox').val()) > 23) || (parseFloat($('#GMTtextbox').val()) < -23)){ \
+      alert('GMT offset cannot be smaller than -23 or bigger than 23');return false;} \
+    if ((parseFloat($('#DSTtextbox').val()) > 23) || (parseFloat($('#DSTtextbox').val()) < -23)){ \
+      alert('DST offset cannot be smaller than -23 or bigger than 23');return false;}return true;} \
+  function ntpsave(){ \
+    if (NTPInputValidation()){ \
+      $.post(\"ntpsave\",{ \
+        NTP: $(\"#NTPtextbox\").val(), \
+        NTPtzstring: $(\"#NTPtztextbox\").val(), \
+        GMT: $(\"#GMTtextbox\").val(), \
+        DST: $(\"#DSTtextbox\").val() \
+      },function(data, status){ \
+        if(status==\"success\"){alert(\"NTP settings saved\");} \
+        else{alert(\"ERROR\");}}); \
+      /*initLoadData();*/}} \
+  function wifiInputValidation(){if (($('#SSID').val()==\"\") || ($('#password').val()==\"\") || ($('#devicename').val()==\"\")){alert('Please complete all the fields before saving.');return false;}if (($('#SSID').val().length > 32)){alert('SSID cannot be longer than 32 characters');return false;}if (($('#password').val().length > 63)){alert('Password cannot be longer than 63 characters');return false;}if (($('#devicename').val().length > 16)){alert('Device name cannot be longer than 16 characters');return false;}var str=$('#devicename').val();if (str.includes(\" \")){alert('Device name cannot contains spaces');return false;}return true;}function wifisave(){if (wifiInputValidation()){$.post(\"wifisave\",{SSID: $(\"#SSID\").val(),password: $(\"#password\").val(),devicename: $(\"#devicename\").val()},function(data, status){if(status==\"success\"){alert(\"WLAN settings saved\");}else{alert(\"ERROR\");}});$('#SSID').val('');$('#password').val('');}}function wifireset(){$.post(\"wifireset\", function(data, status){if(status==\"success\"){alert(\"WLAN settings reset\");}else{alert(\"ERROR\");}});$('#SSID').val('');$('#password').val(''); $('#devicename').val('K2400');/*initLoadData();*/}function alarmInputValidation(){if (($('#hourAlarm').val()==\"\") || ($('#minAlarm').val()==\"\")){alert('Please complete all the fields before saving.');return false;}if((parseInt($('#hourAlarm').val()) < 0) || (parseInt($('#hourAlarm').val()) > 23)){alert('Alarm hour cannot be smaller than 0 or larger than 23.');return false;}if((parseInt($('#minAlarm').val()) < 0) || (parseInt($('#minAlarm').val()) > 59)){alert('Alarm minutes cannot be smaller than 0 or larger than 59.');return false;}return true;}function alarmsave(){if (alarmInputValidation()){$.post(\"alarmsave\",{alarmOn:$(\"#alarmOn\").val(),hourAlarm: $(\"#hourAlarm\").val(),minAlarm: $(\"#minAlarm\").val()},function(data, status){if(status==\"success\"){alert(\"Alarm settings saved\");}else{alert(\"ERROR\");}});}}function alarmreset(){$.post(\"alarmreset\", function(data, status){if(status==\"success\"){alert(\"Alarm settings reset\");}else{alert(\"ERROR\");}});$('#alarmOn').val('0');$('#hourAlarm').val('');$('#minAlarm').val('');/*initLoadData();*/}function dimInputValidation(){if (($('#hourStartDim').val()==\"\") || ($('#hourStopDim').val()==\"\") || ($('#valueDim').val()==\"\")){alert('Please complete all the fields before saving.');return false;}if((parseInt($('#hourStartDim').val()) < 0) || (parseInt($('#hourStartDim').val()) > 23)){alert('Start hour cannot be smaller than 0 or larger than 23.');return false;}if((parseInt($('#hourStopDim').val()) < 0) || (parseInt($('#hourStopDim').val()) > 23)){alert('Stop hour cannot be smaller than 0 or larger than 23.');return false;}return true;}function dimsave(){if (dimInputValidation()){$.post(\"dimsave\",{dimOn:$(\"#dimOn\").val(),hourStartDim:$(\"#hourStartDim\").val(),hourStopDim: $(\"#hourStopDim\").val(),valueDim: $(\"#valueDim\").val()},function(data, status){if(status==\"success\"){alert(\"Dim settings saved\");}else{alert(\"ERROR\");}});}}function dimreset(){$.post(\"dimreset\", function(data, status){if(status==\"success\"){alert(\"Dim settings reset\");}else{alert(\"ERROR\");}});$('#dimOn').val('0');$('#hourStartDim').val('');$('#hourStopDim').val('');$('#valueDim').val('128');/*initLoadData();*/}function globalrestart(){$.post(\"globalrestart\", function(data, status){if(status==\"success\"){alert(\"Device restarting\");}else{alert(\"ERROR\");}});}function globalreset(){$.post(\"globalreset\", function(data, status){if(status==\"success\"){alert(\"Factory defaults restored\");}else{alert(\"ERROR\");}});}function colorsave(){$.post(\"colorsave\", function (data, status){});}function colorload(){$.post(\"colorload\", function (data, status){});}function colorreset(){$.post(\"colorreset\", function (data, status){});}function update(){$.post(\"data\",{brightness: $(\"#brightness\").val(),hourRed: $(\"#hourRed\").val(),hourGreen: $(\"#hourGreen\").val(),hourBlue: $(\"#hourBlue\").val(),minuteRed: $(\"#minuteRed\").val(),minuteGreen: $(\"#minuteGreen\").val(),minuteBlue: $(\"#minuteBlue\").val(),secondRed: $(\"#secondRed\").val(),secondGreen: $(\"#secondGreen\").val(),secondBlue: $(\"#secondBlue\").val(),pendRed: $(\"#pendRed\").val(),pendGreen: $(\"#pendGreen\").val(),pendBlue: $(\"#pendBlue\").val(),minRed: $(\"#minRed\").val(),minGreen: $(\"#minGreen\").val(),minBlue: $(\"#minBlue\").val(),quarterRed: $(\"#quarterRed\").val(),quarterGreen: $(\"#quarterGreen\").val(),quarterBlue: $(\"#quarterBlue\").val(),mode: $(\"#mode\").val(),invert: $(\"#invert\").val()}, function(data, status){});}</script> \ 
+    } \
+  </head> \ 
+  <body> <div class=\"sidebar\"> <nav> <li class=\"nav-item\"> \ 
+  <a href=\"#\" rel=\"section1\">Color Settings</a> \ 
+  </li> \ 
+  <li class=\"nav-item\"> \ 
+  <a href=\"#\" rel=\"section2\">Time Settings</a> \ 
+  </li> \ 
+  <li class=\"nav-item\"> \ 
+  <a href=\"#\" rel=\"section3\">WLAN Settings</a> \ 
+  </li> \ 
+  <li class=\"nav-item\"> \ 
+  <a href=\"#\" rel=\"section4\">Device Settings</a> \ 
+  </li> \ 
+  </nav> <span class=\"disclaimer\">Copyright © 2018 | Velleman</span> </div> \ 
+  <div class=\"content\"> <div class=\"header\"> \ 
+  <header> <span class=\"nav-trigger\"> <span> <span class=\"line\"> \ 
+  </span> <span class=\"line\"> \ 
+  </span> <span class=\"line\"> \ 
+  </span> </span> </span> <span class=\"clocktextcontainer\"> <span class=\"text\" id=\"hour\">00</span> <span class=\"text\">:</span> <span class=\"text\" id=\"min\">00</span> <span class=\"text\">:</span> <span class=\"text\" id=\"sec\">00</span> </span> </header> </div> \ 
+  <main> <article> <div id=\"section1\"> <div class=\"propertycontainersmall\"> <p>Brightness</p> \ 
+  <div class=\"slidecontainer\"> <input type=\"range\" min=\"0\" max=\"255\" value=\"128\" class=\"slider white\" id=\"brightness\" onChange=\"update()\"> </div> \ 
+  </div> \ 
+  <div class=\"propertycontainer\"> <p>Display mode</p> \ 
+  <div class=\"slidecontainer\"> <input type=\"range\" min=\"0\" max=\"8\" value=\"0\" class=\"slider white\" id=\"mode\" onChange=\"update()\"> </div> \ 
+  </div> \ 
+  <div class=\"propertycontainersmall\"> <p>Hour hand</p> \ 
+  <div class=\"slidecontainer\"> <input type=\"range\" min=\"0\" max=\"255\" value=\"128\" class=\"slider red\" id=\"hourRed\" onChange=\"update()\"> </div> \ 
+  <div class=\"slidecontainer\"> <input type=\"range\" min=\"0\" max=\"255\" value=\"128\" class=\"slider green\" id=\"hourGreen\" onChange=\"update()\"> </div> \ 
+  <div class=\"slidecontainer\"> <input type=\"range\" min=\"0\" max=\"255\" value=\"128\" class=\"slider blue\" id=\"hourBlue\" onChange=\"update()\"> </div> \ 
+  </div> \ 
+  <div class=\"propertycontainersmall\"> <p>Minute hand</p> \ 
+  <div class=\"slidecontainer\"> <input type=\"range\" min=\"0\" max=\"255\" value=\"128\" class=\"slider red\" id=\"minuteRed\" onChange=\"update()\"> </div> \ 
+  <div class=\"slidecontainer\"> <input type=\"range\" min=\"0\" max=\"255\" value=\"128\" class=\"slider green\" id=\"minuteGreen\" onChange=\"update()\"> </div> \ 
+  <div class=\"slidecontainer\"> <input type=\"range\" min=\"0\" max=\"255\" value=\"128\" class=\"slider blue\" id=\"minuteBlue\" onChange=\"update()\"> </div> \ 
+  </div> \ 
+  <div class=\"propertycontainersmall\"> <p>Second hand</p> \ 
+  <div class=\"slidecontainer\"> <input type=\"range\" min=\"0\" max=\"255\" value=\"128\" class=\"slider red\" id=\"secondRed\" onChange=\"update()\"> </div> \ 
+  <div class=\"slidecontainer\"> <input type=\"range\" min=\"0\" max=\"255\" value=\"128\" class=\"slider green\" id=\"secondGreen\" onChange=\"update()\"> </div> \ 
+  <div class=\"slidecontainer\"> <input type=\"range\" min=\"0\" max=\"255\" value=\"128\" class=\"slider blue\" id=\"secondBlue\" onChange=\"update()\"> </div> \ 
+  </div> \ 
+  <div class=\"propertycontainersmall\"> <p>Pendulum</p> \ 
+  <div class=\"slidecontainer\"> <input type=\"range\" min=\"0\" max=\"255\" value=\"128\" class=\"slider red\" id=\"pendRed\" onChange=\"update()\"> </div> \ 
+  <div class=\"slidecontainer\"> <input type=\"range\" min=\"0\" max=\"255\" value=\"128\" class=\"slider green\" id=\"pendGreen\" onChange=\"update()\"> </div> \ 
+  <div class=\"slidecontainer\"> <input type=\"range\" min=\"0\" max=\"255\" value=\"128\" class=\"slider blue\" id=\"pendBlue\" onChange=\"update()\"> </div> \ 
+  </div> \ 
+  <div class=\"propertycontainersmall\"> <p>5 Minute Marks</p> \ 
+  <div class=\"slidecontainer\"> <input type=\"range\" min=\"0\" max=\"255\" value=\"128\" class=\"slider red\" id=\"minRed\" onChange=\"update()\"> </div> \ 
+  <div class=\"slidecontainer\"> <input type=\"range\" min=\"0\" max=\"255\" value=\"128\" class=\"slider green\" id=\"minGreen\" onChange=\"update()\"> </div> \ 
+  <div class=\"slidecontainer\"> <input type=\"range\" min=\"0\" max=\"255\" value=\"128\" class=\"slider blue\" id=\"minBlue\" onChange=\"update()\"> </div> \ 
+  </div> \ 
+  <div class=\"propertycontainersmall\"> <p>15 Minute Marks</p> \ 
+  <div class=\"slidecontainer\"> <input type=\"range\" min=\"0\" max=\"255\" value=\"128\" class=\"slider red\" id=\"quarterRed\" onChange=\"update()\"> </div> \ 
+  <div class=\"slidecontainer\"> <input type=\"range\" min=\"0\" max=\"255\" value=\"128\" class=\"slider green\" id=\"quarterGreen\" onChange=\"update()\"> </div> \ 
+  <div class=\"slidecontainer\"> <input type=\"range\" min=\"0\" max=\"255\" value=\"128\" class=\"slider blue\" id=\"quarterBlue\" onChange=\"update()\"> </div> \ 
+  </div> \ 
+  <div class=\"propertycontainersmall\"> <p>Invert colors</p> \ 
+  <div class=\"textcontainer\"> <span class=\"smalltext\" >OFF/ON</span> </div> \ 
+  <div class=\"slidecontainersmall\"> <input type=\"range\" style=\"width:25%;\" min=\"0\" max=\"1\" value=\"0\" class=\"slider grey\" id=\"invert\" onChange=\"update()\"> </div> \ 
+  </div> \ 
+  <div class=\"propertycontainer\"> <p>Color Settings</p> \ 
+  <div class=\"buttoncontainer\"> <button class=\"btn\" onClick=\"colorsave()\" type=\"button\">SAVE</button> </div> \ 
+  <div class=\"buttoncontainer\"> <button class=\"btn\" onClick=\"colorload()\" type=\"button\">LOAD</button> </div> \ 
+  <div class=\"buttoncontainer\"> <button class=\"btn\" onClick=\"colorreset()\" type=\"button\">RESET</button> </div> \ 
+  </div> \ 
+  </div> \ 
+  <div id=\"section2\"> <div class=\"propertycontainer\"> <p>NTP server</p> \ 
+  <div class=\"textcontainer\"> <span class=\"smalltext\" >NTP server: </span> </div> \ 
+  <div class=\"textboxcontainer\"> <input type=\"text\" class=\"textbox\" id=\"NTPtextbox\" placeholder=\"Enter new NTP server here\"/> </div> \ 
+  <div class=\"textcontainer\"> <span class=\"smalltext\" >NTP TZ string: </span> </div> \ 
+  <div class=\"textboxcontainer\"> <input type=\"text\" class=\"textbox\" id=\"NTPtztextbox\" placeholder=\"Enter new NTP TZ string here\"/> </div> \ 
+  <div class=\"textcontainer\"> <span class=\"smalltext\" >GMT offset (hours): </span> </div> \ 
+  <div class=\"textboxcontainer\"> <input type=\"number\" pattern=\"[0-9]+\" class=\"textbox\" id=\"GMTtextbox\" placeholder=\"Enter GMT offset (hours)\"/> </div> \ 
+  <div class=\"textcontainer\"> <span class=\"smalltext\" >DST offset (hours): </span> </div> \ 
+  <div class=\"textboxcontainer\"> <input type=\"number\" pattern=\"[0-9]+\" class=\"textbox\" id=\"DSTtextbox\" placeholder=\"Enter DST offset (hours)\"/> </div> \ 
+  <div class=\"buttoncontainer\"> <button class=\"btn\" onClick=\"ntpsave()\" type=\"button\">SAVE</button> </div> \ 
+  <div class=\"buttoncontainer\"> <button class=\"btn\" onClick=\"ntpreset()\" type=\"button\">RESET</button> </div> \ 
+  </div> \ 
+  <div class=\"propertycontainer\"> <p>Alarm</p> \ 
+  <div class=\"textcontainer\"> <span class=\"smalltext\" >Hour: </span> </div> \ 
+  <div class=\"textboxcontainer\"> <input type=\"number\" pattern=\"[0-9]+\" class=\"textbox\" id=\"hourAlarm\" placeholder=\"Enter hour\"/> </div> \ 
+  <div class=\"textcontainer\"> <span class=\"smalltext\" >Minutes: </span> </div> \ 
+  <div class=\"textboxcontainer\"> <input type=\"number\" pattern=\"[0-9]+\" class=\"textbox\" id=\"minAlarm\" placeholder=\"Enter minutes\"/> </div> \ 
+  <div class=\"textcontainer\"> <span class=\"smalltext\" >Alarm OFF/ON</span> </div> \ 
+  <div class=\"slidecontainersmall\"> <input type=\"range\" style=\"width:25%;\" min=\"0\" max=\"1\" value=\"0\" class=\"slider grey\" id=\"alarmOn\"> </div> \ 
+  <div class=\"buttoncontainer\"> <button class=\"btn\" onClick=\"alarmsave()\" type=\"button\">SAVE</button> </div> \ 
+  <div class=\"buttoncontainer\"> <button class=\"btn\" onClick=\"alarmreset()\" type=\"button\">RESET</button> </div> \ 
+  </div> \ 
+  <div class=\"propertycontainer\"> <p>Auto Dimming</p> \ 
+  <div class=\"textcontainer\"> <span class=\"smalltext\" >Start dimming at: (hour) </span> </div> \ 
+  <div class=\"textboxcontainer\"> <input type=\"number\" pattern=\"[0-9]+\" class=\"textbox\" id=\"hourStartDim\" placeholder=\"Enter hour\"/> </div> \ 
+  <div class=\"textcontainer\"> <span class=\"smalltext\" >Stop dimming at: (hour) </span> </div> \ 
+  <div class=\"textboxcontainer\"> <input type=\"number\" pattern=\"[0-9]+\" class=\"textbox\" id=\"hourStopDim\" placeholder=\"Enter hour\"/> </div> \ 
+  <div class=\"textcontainer\"> <span class=\"smalltext\" >Dim to: </span> </div> \ 
+  <div class=\"slidecontainer\"> <input type=\"range\" min=\"0\" max=\"255\" value=\"128\" class=\"slider white\" id=\"valueDim\"> </div> \ 
+  <div class=\"textcontainer\"> <span class=\"smalltext\" >Auto Dimming OFF/ON</span> </div> \ 
+  <div class=\"slidecontainersmall\"> <input type=\"range\" style=\"width:25%;\" min=\"0\" max=\"1\" value=\"0\" class=\"slider grey\" id=\"dimOn\"> </div> \ 
+  <div class=\"buttoncontainer\"> <button class=\"btn\" onClick=\"dimsave()\" type=\"button\">SAVE</button> </div> \ 
+  <div class=\"buttoncontainer\"> <button class=\"btn\" onClick=\"dimreset()\" type=\"button\">RESET</button> </div> \ 
+  </div> \ 
+  </div> \ 
+  <div id=\"section3\"> <div class=\"propertycontainer\"> <p>WLAN Settings</p> \ 
+  <div class=\"textcontainer\"> <span class=\"smalltext\" >WLAN settings:</span> </div> \ 
+  <div class=\"textboxcontainer\"> <input type=\"text\" class=\"textbox\" id=\"SSID\" placeholder=\"Enter SSID\"/> </div> \ 
+  <div class=\"textboxcontainer\"> <input type=\"password\" class=\"textbox\" id=\"password\" placeholder=\"Enter PASSWORD\"/> </div> \ 
+  <div class=\"textcontainer\"> <span class=\"smalltext\" >Name of your device: </span> </div> \ 
+  <div class=\"textboxcontainer\"> <input type=\"text\" class=\"textbox\" id=\"devicename\"/> </div> \ 
+  <div class=\"buttoncontainer\"> <button class=\"btn\" onClick=\"wifisave()\" type=\"button\">SAVE</button> </div> \ 
+  <div class=\"buttoncontainer\"> <button class=\"btn\" onClick=\"wifireset()\" type=\"button\">RESET</button> </div> \ 
+  </div> \ 
+  </div> \ 
+  <div id=\"section4\"> \ 
+  <div class=\"propertycontainersmall\"> <p>Device Restart</p> \ 
+  <div class=\"buttoncontainer\"> <button class=\"btn\" onClick=\"globalrestart()\" type=\"button\">RESTART</button> </div> \ 
+  </div> \ 
+  <div class=\"propertycontainer\"> <p>Factory Defaults</p> \ 
+  <div class=\"buttoncontainer\"> <button class=\"btn\" onClick=\"globalreset()\" type=\"button\">RESET</button> </div> \ 
+  </div> \ 
+  </div> \ 
+  </article> </main> </div> \ 
+  </body> \ 
+  </html>"};
 /* 
  * Minify HTML -> https://www.willpeavy.com/minifier/
  * Escape HTML -> http://tomeko.net/online_tools/cpp_text_escape.php?lang=en
  */
 //-------------------------------------------------------------------------------
 struct tm timeinfo;                               //Timeinfo will hold all current time data
-String NTPstring = "time.google.com";             //Webaddress for timeserver
+String NTPstring = "de.pool.ntp.org";             //Webaddress for timeserver
+String NTPtzstring ="CET-1CEST,M3.5.0/03,M10.5.0/03";
 String NTPstringbackup;                           //backup string for when NTP server is reset
 float gmtOffset_hour = 0;                         //Greenwich Mean Time offset (in hours)
 float daylightOffset_hour = 0;                    //Daylight Saving Time offset (in seconds)
@@ -158,6 +376,9 @@ void setup(){
 
   LoadPreferences();
 
+  uint8_t base_mac[6] = {0xB4, 0xE6, 0x2D, 0x98, 0x90, 0x11}; //B4:E6:2D:98:90:11
+  esp_base_mac_addr_set(my_mac);
+
   delay(500);
 
   xTaskCreatePinnedToCore(
@@ -233,6 +454,16 @@ void codeForLEDtask( void * parameter){
         case 0:
           AnimSwitch();
           //maxBrightness = 230;
+          /*
+          void StartAnimation(uint16_t indexAnimation, uint16_t duration, AnimUpdateCallback animUpdate)
+
+          Start an animation at the given index, set the length in time to duration, and provide a update callback that apply the effect.
+
+             indexAnimation - the animation channel to use. If there is an active animation on that channel, it will be stopped first and then the channel will be reused.
+             duration - the length of time the animation will run. The scale is based on the flags passed to the constructor of this manager class.
+             animUpdate - the callback function that will be called for every passage of time.
+
+          */
           animations.StartAnimation(6,10,    HourHand0);
           animations.StartAnimation(5,10,    MinuteHand0);
           animations.StartAnimation(4,25,    SecondHand0Tail);
@@ -603,8 +834,8 @@ void MDNSService(String URL){
 bool ValidateNTP(AsyncWebServerRequest *request){
   int paramsNr = request->params();
   if(paramsNr == 3){
-    
-    AsyncWebParameter* p = request->getParam(0);
+    //hgode
+    const AsyncWebParameter* p = request->getParam(0);
     NTPstring = p->value();
 
     p = request->getParam(1);
@@ -614,6 +845,22 @@ bool ValidateNTP(AsyncWebServerRequest *request){
     p = request->getParam(2);
     NTPData = p->value();
     daylightOffset_hour = NTPData.toFloat();
+  }
+  else if(paramsNr == 4){
+    //hgode
+    const AsyncWebParameter* p = request->getParam(0);
+    NTPstring = p->value();
+
+    p = request->getParam(1);
+    String NTPData = p->value();
+    gmtOffset_hour = NTPData.toFloat();
+
+    p = request->getParam(2);
+    NTPData = p->value();
+    daylightOffset_hour = NTPData.toFloat();
+
+    p = request->getParam(3);
+    NTPtzstring = p->value();
   }
   else {
     return false;
@@ -629,8 +876,8 @@ bool ValidateNTP(AsyncWebServerRequest *request){
 bool ValidateWLAN(AsyncWebServerRequest *request){
   int paramsNr = request->params();
   if(paramsNr == 3){
-   
-    AsyncWebParameter* p = request->getParam(0);
+    //hgode
+    const AsyncWebParameter* p = request->getParam(0);
     validationString = p->value();
     if (validationString.length() <= 32){
       SSIDstring = validationString;
@@ -673,8 +920,8 @@ bool ValidateWLAN(AsyncWebServerRequest *request){
 bool ValidateAlarm(AsyncWebServerRequest *request){
   int paramsNr = request->params();
   if(paramsNr == 3){
-   
-    AsyncWebParameter* p = request->getParam(0);
+    //hgode
+    const AsyncWebParameter* p = request->getParam(0);
     validationString = p->value();
     if ((validationString.toInt() == 0) || (validationString.toInt() == 1)){
       alarmOn = validationString.toInt();
@@ -717,8 +964,9 @@ bool ValidateAlarm(AsyncWebServerRequest *request){
 bool ValidateDim(AsyncWebServerRequest *request){
   int paramsNr = request->params();
   if(paramsNr == 4){
-   
-    AsyncWebParameter* p = request->getParam(0);
+
+    //hgode
+    const AsyncWebParameter* p = request->getParam(0);
     validationString = p->value();
     if ((validationString.toInt() == 0) || (validationString.toInt() == 1)){
       dimOn = validationString.toInt();
@@ -770,8 +1018,8 @@ bool ValidateDim(AsyncWebServerRequest *request){
 bool ValidateData(AsyncWebServerRequest *request){
   int paramsNr = request->params();
   if(paramsNr == 21){
-   
-    AsyncWebParameter* p = request->getParam(0);
+    //hgode
+    const AsyncWebParameter* p = request->getParam(0);
     validationString = p->value();
     if ((validationString.toInt() >= 0) && (validationString.toInt() <= 255)){
       totalBrightness = validationString.toInt();
@@ -1087,8 +1335,10 @@ void WebServer(void){
     ValidateData(request);
 
     AsyncResponseStream *response = request->beginResponseStream("text/json");
-    DynamicJsonBuffer jsonBuffer;
-    JsonObject &root = jsonBuffer.createObject();
+    DynamicJsonDocument root(1024);
+    // changes from v5.x to 6.x see https://arduinojson.org/v6/doc/upgrade/
+//    DynamicJsonBuffer jsonBuffer;
+//    JsonObject &root = jsonBuffer.createObject();
     root["brightness"] = totalBrightness;
     root["hourRed"] = hourHandColor.R;
     root["hourGreen"] = hourHandColor.G;
@@ -1114,6 +1364,7 @@ void WebServer(void){
     root["min"] = timeinfo.tm_min > 9 ? String(timeinfo.tm_min) : "0" + String(timeinfo.tm_min);
     root["sec"] = timeinfo.tm_sec > 9 ? String(timeinfo.tm_sec) : "0" + String(timeinfo.tm_sec);
     root["NTP"] = NTPstring;
+    root["NTPtzstring"] = NTPtzstring;
     root["GMT"] = gmtOffset_hour;
     root["DST"] = daylightOffset_hour;
     root["devicename"] = deviceName;
@@ -1124,7 +1375,8 @@ void WebServer(void){
     root["hourStartDim"] = hourStartDim;
     root["hourStopDim"] = hourStopDim;
     root["valueDim"] = valueDim;
-    root.printTo(*response);
+    serializeJson(root, *response);
+//    root.printTo(*response);
     request->send(response);
   });
     
@@ -1243,6 +1495,36 @@ void CheckLocalTime(){
  *  SyncWithServer will try to sync the time with the NTP server 
  */
 //-------------------------------------------------------------------------------
+
+void setTimezone(String timezone){
+  Serial.printf("  Setting Timezone to %s\n",timezone.c_str());
+  setenv("TZ",timezone.c_str(),1);  //  Now adjust the TZ.  Clock settings are adjusted to show the new local time
+  tzset();
+}
+
+void initTime(String timezone){
+  struct tm timeinfo;
+
+  Serial.println("Setting up time");
+  configTime(0, 0, "pool.ntp.org");    // First connect to NTP server, with 0 TZ offset
+  if(!getLocalTime(&timeinfo)){
+    Serial.println("  Failed to obtain time");
+    return;
+  }
+  Serial.println("  Got the time from NTP");
+  // Now we can set the real timezone
+  setTimezone(timezone);
+}
+
+void printLocalTime(){
+  struct tm timeinfo;
+  if(!getLocalTime(&timeinfo)){
+    Serial.println("Failed to obtain time 1");
+    return;
+  }
+  Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S zone %Z %z ");
+}
+
 void SyncWithServer(void){
   char ntpServer[NTPstring.length()+1];
   NTPstring.toCharArray(ntpServer, NTPstring.length()+1);
@@ -1251,7 +1533,26 @@ void SyncWithServer(void){
   long daylightOffset_sec = daylightOffset_hour * 3600; 
 
   DEBUG_PRINTLN("Attempt to sync time with server!");
-  configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+//hgode  configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+
+  //################
+  String ntp = "de.pool.ntp.org";
+  initTime(NTPtzstring); // "CET-1CEST,M3.5.0/03,M10.5.0/03");   // Set for EU
+  printLocalTime();
+  
+  //configTzTime(“CET-1CEST,M3.5.0/03,M10.5.0/03”, ntp.c_str());
+  //################
+  /* for correct tz and DST, see https://github.com/espressif/arduino-esp32/issues/3797
+  ie: Europe 	Berlin,Germany 	CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00
+
+
+  const char * NTPpool         = ntpServer; //"nl.pool.ntp.org";
+  const char * defaultTimezone = "CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00"; //"CET-1CEST,M3.5.0/2,M10.5.0/3";
+
+  configTzTime( defaultTimezone, NTPpool); //sets TZ and starts NTP sync
+
+  */
+    
 }
 //-------------------------------------------------------------------------------
 /*  
@@ -1263,6 +1564,7 @@ void ResetNTP(void){
   preferences.clear();
   preferences.putUInt("NTPStored", 1);
   preferences.putString("NTP", NTPstringbackup);
+  preferences.putString("NTPtzstring", NTPtzstring);
   preferences.putLong("GMT", 0);
   preferences.putInt("DST", 0);
   preferences.end();
@@ -1281,6 +1583,7 @@ void ResetNTP(void){
 void LoadNTP(void){
   preferences.begin("NTP", false);
   NTPstring = preferences.getString("NTP");
+  NTPtzstring = preferences.getString("NTPtzstring");
   gmtOffset_hour = preferences.getFloat("GMT",0);
   daylightOffset_hour = preferences.getFloat("DST",0);
   preferences.end();
@@ -1289,6 +1592,8 @@ void LoadNTP(void){
   DEBUG_PRINTLN("NTP settings loaded...");
   DEBUG_PRINT("NTP server is: ");
   DEBUG_PRINTLN(NTPstring);
+  DEBUG_PRINT("NTP TZ string is: ");
+  DEBUG_PRINTLN(NTPtzstring);
   DEBUG_PRINT("GMT is: ");
   DEBUG_PRINTLN(gmtOffset_hour);
   DEBUG_PRINT("DST is: ");
@@ -1304,6 +1609,7 @@ void SaveNTP(void){
   preferences.begin("NTP", false);
   preferences.putUInt("NTPStored", 1);
   preferences.putString("NTP", NTPstring);
+  preferences.putString("NTPtzstring", NTPtzstring);
   preferences.putFloat("GMT", gmtOffset_hour);
   preferences.putFloat("DST", daylightOffset_hour);
   preferences.end();
@@ -1312,6 +1618,8 @@ void SaveNTP(void){
   DEBUG_PRINTLN("NTP settings loaded...");
   DEBUG_PRINT("NTP server is: ");
   DEBUG_PRINTLN(NTPstring);
+  DEBUG_PRINT("NTP tz string is: ");
+  DEBUG_PRINTLN(NTPtzstring);
   DEBUG_PRINT("GMT is: ");
   DEBUG_PRINTLN(gmtOffset_hour);
   DEBUG_PRINT("DST is: ");
