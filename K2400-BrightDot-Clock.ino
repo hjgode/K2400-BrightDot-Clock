@@ -377,7 +377,7 @@ void setup(){
   LoadPreferences();
 
   uint8_t base_mac[6] = {0xB4, 0xE6, 0x2D, 0x98, 0x90, 0x11}; //B4:E6:2D:98:90:11
-  esp_base_mac_addr_set(my_mac);
+  esp_base_mac_addr_set(base_mac);
 
   delay(500);
 
@@ -1539,8 +1539,12 @@ void SyncWithServer(void){
   String ntp = "de.pool.ntp.org";
   initTime(NTPtzstring); // "CET-1CEST,M3.5.0/03,M10.5.0/03");   // Set for EU
   printLocalTime();
+
+  // short form without helpers
+//  configTzTime(NTPtzstring.c_str(), ntp.c_str());
+  configTzTime(NTPtzstring.c_str(), NTPstring.c_str());
+  printLocalTime();
   
-  //configTzTime(“CET-1CEST,M3.5.0/03,M10.5.0/03”, ntp.c_str());
   //################
   /* for correct tz and DST, see https://github.com/espressif/arduino-esp32/issues/3797
   ie: Europe 	Berlin,Germany 	CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00
