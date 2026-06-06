@@ -4,12 +4,23 @@
 //the order of includes is important
 #include <ArduinoJson.h>
 
+#include <ArduinoOTA.h>
+
 /*
  * Clock firmware 1.0
  * 
  * Written by JGE
  * 
  * 2018
+ * 
+ * 2026 mod by hjgode
+ * 
+ * added NTPtzString
+ * added ArduinoOTA
+ * 
+ * const uint8_t PixelPin = 2; # GPIO2
+ * 
+ * Arduino IDE 1.8.13 plus ESP32 board dev package
  */
 //-------------------------------------------------------------------------------
 //#include <NeoPixelBus.h>
@@ -363,6 +374,9 @@ AnimEaseFunction animation5 = NeoEase::QuadraticIn;
  */
 //-------------------------------------------------------------------------------
 void setup(){
+  
+  ArduinoOTA.begin();  // Starts OTA
+
   #ifdef DEBUG
     Serial.begin(115200);
   #endif 
@@ -1388,7 +1402,10 @@ void WebServer(void){
  */
 //-------------------------------------------------------------------------------
 void loop(){
-  if((WiFi.status() == WL_CONNECTED)){
+
+    ArduinoOTA.handle();  // Handles OTA
+    
+    if((WiFi.status() == WL_CONNECTED)){
     
     UDPBroadcast();
     

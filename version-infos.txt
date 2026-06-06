@@ -9,16 +9,53 @@ ESP32 Dev
 
 /home/hgode/bin/arduino-1.8.13/portable/packages/esp32/tools/xtensa-esp32-elf-gcc/1.22.0-80-g6c4433a-5.2.0/bin/xtensa-esp32-elf-size -A  
 
+Multiple libraries were found for "NeoPixelBus.h"
+ Used: /home/hgode/bin/arduino-1.8.13/portable/sketchbook/libraries/NeoPixelBus
+ Not used: /home/hgode/bin/arduino-1.8.13/portable/sketchbook/libraries/NeoPixelBus_by_Makuna
 Multiple libraries were found for "WiFi.h"
- Used: /home/hgode/bin/arduino-1.8.13/portable/packages/esp32/hardware/esp32/1.0.0/libraries/WiFi
+ Used: /home/hgode/bin/arduino-1.8.13/portable/packages/esp32/hardware/esp32/2.0.14/libraries/WiFi
  Not used: /home/hgode/bin/arduino-1.8.13/libraries/WiFi
-Using library NeoPixelBus at version 2.2.9 in folder: /home/hgode/SketchBook/libraries/NeoPixelBus 
-Using library SPI at version 1.0 in folder: /home/hgode/bin/arduino-1.8.13/portable/packages/esp32/hardware/esp32/1.0.0/libraries/SPI 
-Using library WiFi at version 1.0 in folder: /home/hgode/bin/arduino-1.8.13/portable/packages/esp32/hardware/esp32/1.0.0/libraries/WiFi 
-Using library FS at version 1.0 in folder: /home/hgode/bin/arduino-1.8.13/portable/packages/esp32/hardware/esp32/1.0.0/libraries/FS 
-Using library AsyncTCP at version 1.0.0 in folder: /home/hgode/SketchBook/libraries/AsyncTCP 
-Using library ESPAsyncWebServer at version 1.1.0 in folder: /home/hgode/SketchBook/libraries/ESPAsyncWebServer 
-Using library ArduinoJson at version 5.13.1 in folder: /home/hgode/SketchBook/libraries/ArduinoJson 
-Using library Preferences at version 1.0 in folder: /home/hgode/bin/arduino-1.8.13/portable/packages/esp32/hardware/esp32/1.0.0/libraries/Preferences 
-Using library ESPmDNS at version 1.0 in folder: /home/hgode/bin/arduino-1.8.13/portable/packages/esp32/hardware/esp32/1.0.0/libraries/ESPmDNS 
+Using library NeoPixelBus at version 2.2.9 in folder: /home/hgode/bin/arduino-1.8.13/portable/sketchbook/libraries/NeoPixelBus 
+Using library SPI at version 2.0.0 in folder: /home/hgode/bin/arduino-1.8.13/portable/packages/esp32/hardware/esp32/2.0.14/libraries/SPI 
+Using library ArduinoJson at version 7.4.3 in folder: /home/hgode/bin/arduino-1.8.13/portable/sketchbook/libraries/ArduinoJson 
+Using library WiFi at version 2.0.0 in folder: /home/hgode/bin/arduino-1.8.13/portable/packages/esp32/hardware/esp32/2.0.14/libraries/WiFi 
+Using library FS at version 2.0.0 in folder: /home/hgode/bin/arduino-1.8.13/portable/packages/esp32/hardware/esp32/2.0.14/libraries/FS 
+Using library Async_TCP at version 3.4.10 in folder: /home/hgode/bin/arduino-1.8.13/portable/sketchbook/libraries/Async_TCP 
+Using library ESP_Async_WebServer at version 3.10.3 in folder: /home/hgode/bin/arduino-1.8.13/portable/sketchbook/libraries/ESP_Async_WebServer 
+Using library Preferences at version 2.0.0 in folder: /home/hgode/bin/arduino-1.8.13/portable/packages/esp32/hardware/esp32/2.0.14/libraries/Preferences 
+Using library ESPmDNS at version 2.0.0 in folder: /home/hgode/bin/arduino-1.8.13/portable/packages/esp32/hardware/esp32/2.0.14/libraries/ESPmDNS 
+/home/hgode/bin/arduino-1.8.13/portable/packages/esp32/tools/xtensa-esp32-elf-gcc/esp-2021r2-patch5-8.4.0/bin/xtensa-esp32-elf-size -A /tmp/arduino_build_969959/K2400-BrightDot-Clock.ino.elf
+Sketch uses 954381 bytes (72%) of program storage space. Maximum is 1310720 bytes.
+Global variables use 49940 bytes (15%) of dynamic memory, leaving 277740 bytes for local variables. Maximum is 327680 bytes.
 
+ESP32 IDE settings:
+
+board=esp32
+boardsmanager.additional.urls=https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json,https://arduino.esp8266.com/stable/package_esp8266com_index.json,https://mcudude.github.io/MicroCore/package_MCUdude_MicroCore_index.json,https://mcudude.github.io/MegaCore/package_MCUdude_MegaCore_index.json,https://github.com/Optiboot/optiboot/releases/download/v8.0/package_optiboot_optiboot-additional_index.json,https://raw.githubusercontent.com/sleemanj/optiboot/master/dists/package_gogo_diy_atmega8_series_index.json,https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json,https://mcudude.github.io/MiniCore/package_MCUdude_MiniCore_index.json,https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json
+browser=mozilla
+build.verbose=true
+build.warn_data_percentage=75
+cache.enable=true
+compiler.cache_core=true
+compiler.warning_level=none
+console=true
+console.auto_clear=true
+console.error.file=stderr.txt
+console.length=500
+console.lines=4
+console.output.file=stdout.txt
+custom_BOD=168_2v7
+custom_CPUFreq=esp32_240
+custom_CpuFrequency=nodemcu_80
+custom_DebugLevel=esp32_none
+custom_EraseFlash=esp32_none
+custom_EventsCore=esp32_1
+custom_FlashFreq=esp32_80
+custom_FlashMode=esp32_qio
+custom_FlashSize=esp32_4M
+custom_JTAGAdapter=esp32_default
+custom_LTO=168_Os_flto
+custom_LoopCore=esp32_1
+custom_PSRAM=esp32_disabled
+custom_PartitionScheme=esp32_default
+custom_UploadSpeed=esp32_921600
