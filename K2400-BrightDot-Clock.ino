@@ -4,8 +4,10 @@
 //the order of includes is important
 #include <ArduinoJson.h>
 
+#undef USE_OTA
+#ifdef USE_OTA
 #include <ArduinoOTA.h>
-
+#endif
 /*
  * Clock firmware 1.0
  * 
@@ -61,7 +63,47 @@ const char * udpAddress = "255.255.255.255";      //UDP broadcast for discover a
 const int udpPort = 30303;                        //Port for UDP broadcast
 WiFiUDP udp;                                      //create UDP instance
 //-------------------------------------------------------------------------------
-const char HTML1[] PROGMEM = {"<!doctype html><html><head><meta name=\"apple-mobile-web-app-capable\" content=\"yes\"/><meta name=\"apple-mobile-web-app-status-bar-style\" content=\"black\"><meta name=\"format-detection\" content=\"telephone=no\"><meta name=\"viewport\" content=\"width=device-width, user-scalable=no, initial-scale=1.0\"><meta charset=\"utf-8\"><title>K2400 Clock</title><style>body{background-color: white; color: #555555; text-decoration: none; font-family: \"Trebuchet MS\", Helvetica, sans-serif; font-weight: bold; margin-left: 40px; margin-right: 40px;}p{color: #555555; text-indent: 10px; text-transform: uppercase; margin:50px 0px 0px 0px; font-size: 18px; padding-bottom: 10px;}.propertycontainer{width: 100%; min-width: 175px; max-width: 500px; margin: 0 auto; margin-bottom: 50px;}.textcontainer{width: 100%; min-width: 175px; max-width: 500px; margin: 0 auto; text-align: center; margin-top: 30px; margin-bottom: -15px;}.buttoncontainer{width: 100%; text-align: center; margin-top: 30px}.textboxcontainer{width: 100%; text-align: center; margin-top: 30px; color: #555555; font-size: 16px;}.btn{-webkit-border-radius: 30; -moz-border-radius: 30; border-radius: 30px; height: 30px;width: 50%; font-family: Arial; color: #555555; font-size: 16px; background: #dddddd; text-decoration: none; font-family: \"Trebuchet MS\", Helvetica, sans-serif; font-weight: bold; border:none;}.btn:active{color: #dddddd; background: #555555;}.textbox{-webkit-border-radius: 30; -moz-border-radius: 30; box-sizing: border-box; -moz-box-sizing: border-box;-webkit-box-sizing: border-box; border-radius: 30px; width: 100%; height: 30px; font-family: Arial; color: #555555; font-size: 16px; background: #dddddd; text-decoration: none; font-family: \"Trebuchet MS\", Helvetica, sans-serif; font-weight: bold; border:none; padding-left:15px; padding-right:15px;}.text{width: 100%; height: 30px; font-size: 30px; padding-left:10px; padding-right:10px;}.smalltext{width: 100%; height: 30px; font-size: 16px;}.disclaimer{width: 100%; font-size: 10px; z-index: 2000; bottom: 10px; text-align: center; color: #555555;}</style><script>function wifiInputValidation(){var ssid=document.getElementById(\"SSID\").value;var pw=document.getElementById(\"password\").value;var name=document.getElementById(\"name\").value;if ((ssid==\"\") || (pw==\"\") || (name==\"\")){alert('Please complete all the fields before saving.');return false;}if ((ssid.length > 32)){alert('SSID cannot be longer than 32 characters');return false;}if ((pw.length > 63)){alert('Password cannot be longer than 63 characters');return false;}if ((name.length > 16)){alert('Device name cannot be longer than 16 characters');return false;}return true;}function wifisave(){if(wifiInputValidation()){var ssid=document.getElementById(\"SSID\").value;var pw=document.getElementById(\"password\").value;var name=document.getElementById(\"name\").value;var xhr=new XMLHttpRequest();xhr.open('POST', 'wifisave?ssid=' + ssid + '&password=' + pw+ '&name=' + name);xhr.onload=function(){if (xhr.status===200){alert(\"WIFI settings saved and attempting to connect. Connect this device to your wireless network. When using an IOS device go to 'name of device'.local to control to the clock. When using another device use the discover application to find the clock on your network.\");}else{alert(\"ERROR - Please reset the clock and try again.\");}};xhr.send();}}</script></head><body><div class=\"propertycontainer\"><p>Connect to WLAN</p><div class=\"textboxcontainer\"> <input type=\"text\" class=\"textbox\" id=\"SSID\" placeholder=\"Enter SSID\"/> </div><div class=\"textboxcontainer\"> <input type=\"password\" class=\"textbox\" id=\"password\" placeholder=\"Enter PASSWORD\"/> </div><div class=\"textcontainer\"><span class=\"smalltext\" >Name of your device: </span></div><div class=\"textboxcontainer\"> <input type=\"text\" class=\"textbox\" id=\"name\" value=\"K2400\"/> </div><div class=\"buttoncontainer\"> <button class=\"btn\" onClick=\"wifisave()\" type=\"button\">SAVE</button> </div></div><div class=\"disclaimer\"><span>Copyright © 2018 | Velleman</span></div></body></html>"};
+const char HTML1[] PROGMEM = {"<!doctype html><html><head><meta name=\"apple-mobile-web-app-capable\" \
+content=\"yes\"/> \
+<meta name=\"apple-mobile-web-app-status-bar-style\" content=\"black\"> \
+<meta name=\"format-detection\" content=\"telephone=no\"> \
+<meta name=\"viewport\" content=\"width=device-width, user-scalable=no, initial-scale=1.0\"> \
+<meta charset=\"utf-8\"><title>K2400 Clock</title> \
+<style>body{background-color: white; color: #555555; text-decoration: none; \
+font-family: \"Trebuchet MS\", Helvetica, sans-serif; font-weight: bold; \
+margin-left: 40px; margin-right: 40px;} \
+p{color: #555555; text-indent: 10px; text-transform: uppercase; margin:50px 0px 0px 0px; font-size: 18px; padding-bottom: 10px;} \
+.propertycontainer{width: 100%; min-width: 175px; max-width: 500px; margin: 0 auto; margin-bottom: 50px;} \
+.textcontainer{width: 100%; min-width: 175px; max-width: 500px; margin: 0 auto; text-align: center; margin-top: 30px; margin-bottom: -15px;} \
+.buttoncontainer{width: 100%; text-align: center; margin-top: 30px} \
+.textboxcontainer{width: 100%; text-align: center; margin-top: 30px; color: #555555; font-size: 16px;} \
+.btn{-webkit-border-radius: 30; -moz-border-radius: 30; border-radius: 30px; height: 30px;width: 50%; \
+font-family: Arial; color: #555555; font-size: 16px; background: #dddddd; text-decoration: none; \
+font-family: \"Trebuchet MS\", Helvetica, sans-serif; font-weight: bold; border:none;} \
+.btn:active{color: #dddddd; background: #555555;} \
+.textbox{-webkit-border-radius: 30; -moz-border-radius: 30; box-sizing: border-box; -moz-box-sizing: border-box; \
+-webkit-box-sizing: border-box; border-radius: 30px; width: 100%; height: 30px; font-family: Arial; color: #555555; \
+font-size: 16px; background: #dddddd; text-decoration: none; font-family: \"Trebuchet MS\", Helvetica, sans-serif; \
+font-weight: bold; border:none; padding-left:15px; padding-right:15px;} \
+.text{width: 100%; height: 30px; font-size: 30px; padding-left:10px; padding-right:10px;} \
+.smalltext{width: 100%; height: 30px; font-size: 16px;} \
+.disclaimer{width: 100%; font-size: 10px; z-index: 2000; bottom: 10px; text-align: center; color: #555555;} \
+</style> \
+<script>function wifiInputValidation(){var ssid=document.getElementById(\"SSID\").value;var pw=document.getElementById(\"password\").value;var name=document.getElementById(\"name\").value;if ((ssid==\"\") || (pw==\"\") || (name==\"\")){alert('Please complete all the fields before saving.');return false; \
+if ((ssid.length > 32)){alert('SSID cannot be longer than 32 characters');return false;} \
+if ((pw.length > 63)){alert('Password cannot be longer than 63 characters');return false;} \
+if ((name.length > 16)){alert('Device name cannot be longer than 16 characters');return false;}return true;} \
+function wifisave(){if(wifiInputValidation()){var ssid=document.getElementById(\"SSID\").value;var pw=document.getElementById(\"password\").value;var name=document.getElementById(\"name\").value;var xhr=new XMLHttpRequest();xhr.open('POST', 'wifisave?ssid=' + ssid + '&password=' + pw+ '&name=' + name);xhr.onload=function(){if (xhr.status===200){alert(\"WIFI settings saved and attempting to connect. Connect this device to your wireless network. When using an IOS device go to 'name of device'.local to control to the clock. When using another device use the discover application to find the clock on your network.\");}else{alert(\"ERROR - Please reset the clock and try again.\");}};xhr.send();}} \
+</script> \
+</head> \
+<body><div class=\"propertycontainer\"><p>Connect to WLAN</p> \
+<div class=\"textboxcontainer\"> <input type=\"text\" class=\"textbox\" id=\"SSID\" placeholder=\"Enter SSID\"/> </div> \
+<div class=\"textboxcontainer\"> <input type=\"password\" class=\"textbox\" id=\"password\" placeholder=\"Enter PASSWORD\"/> </div> \
+<div class=\"textcontainer\"><span class=\"smalltext\" >Name of your device: </span></div> \
+<div class=\"textboxcontainer\"> <input type=\"text\" class=\"textbox\" id=\"name\" value=\"K2400\"/> </div> \
+<div class=\"buttoncontainer\"> <button class=\"btn\" onClick=\"wifisave()\" type=\"button\">SAVE</button> </div></div> \
+<div class=\"disclaimer\"><span>Copyright © 2018 | Velleman</span></div></body></html>"};
+
 const char HTML2[] PROGMEM = {"<!doctype html> \ 
   <html> \ 
   <head> \ 
@@ -151,8 +193,8 @@ const char HTML2[] PROGMEM = {"<!doctype html> \
         if(status==\"success\"){alert(\"NTP settings saved\");} \
         else{alert(\"ERROR\");}}); \
       /*initLoadData();*/}} \
-  function wifiInputValidation(){if (($('#SSID').val()==\"\") || ($('#password').val()==\"\") || ($('#devicename').val()==\"\")){alert('Please complete all the fields before saving.');return false;}if (($('#SSID').val().length > 32)){alert('SSID cannot be longer than 32 characters');return false;}if (($('#password').val().length > 63)){alert('Password cannot be longer than 63 characters');return false;}if (($('#devicename').val().length > 16)){alert('Device name cannot be longer than 16 characters');return false;}var str=$('#devicename').val();if (str.includes(\" \")){alert('Device name cannot contains spaces');return false;}return true;}function wifisave(){if (wifiInputValidation()){$.post(\"wifisave\",{SSID: $(\"#SSID\").val(),password: $(\"#password\").val(),devicename: $(\"#devicename\").val()},function(data, status){if(status==\"success\"){alert(\"WLAN settings saved\");}else{alert(\"ERROR\");}});$('#SSID').val('');$('#password').val('');}}function wifireset(){$.post(\"wifireset\", function(data, status){if(status==\"success\"){alert(\"WLAN settings reset\");}else{alert(\"ERROR\");}});$('#SSID').val('');$('#password').val(''); $('#devicename').val('K2400');/*initLoadData();*/}function alarmInputValidation(){if (($('#hourAlarm').val()==\"\") || ($('#minAlarm').val()==\"\")){alert('Please complete all the fields before saving.');return false;}if((parseInt($('#hourAlarm').val()) < 0) || (parseInt($('#hourAlarm').val()) > 23)){alert('Alarm hour cannot be smaller than 0 or larger than 23.');return false;}if((parseInt($('#minAlarm').val()) < 0) || (parseInt($('#minAlarm').val()) > 59)){alert('Alarm minutes cannot be smaller than 0 or larger than 59.');return false;}return true;}function alarmsave(){if (alarmInputValidation()){$.post(\"alarmsave\",{alarmOn:$(\"#alarmOn\").val(),hourAlarm: $(\"#hourAlarm\").val(),minAlarm: $(\"#minAlarm\").val()},function(data, status){if(status==\"success\"){alert(\"Alarm settings saved\");}else{alert(\"ERROR\");}});}}function alarmreset(){$.post(\"alarmreset\", function(data, status){if(status==\"success\"){alert(\"Alarm settings reset\");}else{alert(\"ERROR\");}});$('#alarmOn').val('0');$('#hourAlarm').val('');$('#minAlarm').val('');/*initLoadData();*/}function dimInputValidation(){if (($('#hourStartDim').val()==\"\") || ($('#hourStopDim').val()==\"\") || ($('#valueDim').val()==\"\")){alert('Please complete all the fields before saving.');return false;}if((parseInt($('#hourStartDim').val()) < 0) || (parseInt($('#hourStartDim').val()) > 23)){alert('Start hour cannot be smaller than 0 or larger than 23.');return false;}if((parseInt($('#hourStopDim').val()) < 0) || (parseInt($('#hourStopDim').val()) > 23)){alert('Stop hour cannot be smaller than 0 or larger than 23.');return false;}return true;}function dimsave(){if (dimInputValidation()){$.post(\"dimsave\",{dimOn:$(\"#dimOn\").val(),hourStartDim:$(\"#hourStartDim\").val(),hourStopDim: $(\"#hourStopDim\").val(),valueDim: $(\"#valueDim\").val()},function(data, status){if(status==\"success\"){alert(\"Dim settings saved\");}else{alert(\"ERROR\");}});}}function dimreset(){$.post(\"dimreset\", function(data, status){if(status==\"success\"){alert(\"Dim settings reset\");}else{alert(\"ERROR\");}});$('#dimOn').val('0');$('#hourStartDim').val('');$('#hourStopDim').val('');$('#valueDim').val('128');/*initLoadData();*/}function globalrestart(){$.post(\"globalrestart\", function(data, status){if(status==\"success\"){alert(\"Device restarting\");}else{alert(\"ERROR\");}});}function globalreset(){$.post(\"globalreset\", function(data, status){if(status==\"success\"){alert(\"Factory defaults restored\");}else{alert(\"ERROR\");}});}function colorsave(){$.post(\"colorsave\", function (data, status){});}function colorload(){$.post(\"colorload\", function (data, status){});}function colorreset(){$.post(\"colorreset\", function (data, status){});}function update(){$.post(\"data\",{brightness: $(\"#brightness\").val(),hourRed: $(\"#hourRed\").val(),hourGreen: $(\"#hourGreen\").val(),hourBlue: $(\"#hourBlue\").val(),minuteRed: $(\"#minuteRed\").val(),minuteGreen: $(\"#minuteGreen\").val(),minuteBlue: $(\"#minuteBlue\").val(),secondRed: $(\"#secondRed\").val(),secondGreen: $(\"#secondGreen\").val(),secondBlue: $(\"#secondBlue\").val(),pendRed: $(\"#pendRed\").val(),pendGreen: $(\"#pendGreen\").val(),pendBlue: $(\"#pendBlue\").val(),minRed: $(\"#minRed\").val(),minGreen: $(\"#minGreen\").val(),minBlue: $(\"#minBlue\").val(),quarterRed: $(\"#quarterRed\").val(),quarterGreen: $(\"#quarterGreen\").val(),quarterBlue: $(\"#quarterBlue\").val(),mode: $(\"#mode\").val(),invert: $(\"#invert\").val()}, function(data, status){});}</script> \ 
-    } \
+  function wifiInputValidation(){if (($('#SSID').val()==\"\") || ($('#password').val()==\"\") || ($('#devicename').val()==\"\")){alert('Please complete all the fields before saving.');return false;}if (($('#SSID').val().length > 32)){alert('SSID cannot be longer than 32 characters');return false;}if (($('#password').val().length > 63)){alert('Password cannot be longer than 63 characters');return false;}if (($('#devicename').val().length > 16)){alert('Device name cannot be longer than 16 characters');return false;}var str=$('#devicename').val();if (str.includes(\" \")){alert('Device name cannot contains spaces');return false;}return true;}function wifisave(){if (wifiInputValidation()){$.post(\"wifisave\",{SSID: $(\"#SSID\").val(),password: $(\"#password\").val(),devicename: $(\"#devicename\").val()},function(data, status){if(status==\"success\"){alert(\"WLAN settings saved\");}else{alert(\"ERROR\");}});$('#SSID').val('');$('#password').val('');}}function wifireset(){$.post(\"wifireset\", function(data, status){if(status==\"success\"){alert(\"WLAN settings reset\");}else{alert(\"ERROR\");}});$('#SSID').val('');$('#password').val(''); $('#devicename').val('K2400');/*initLoadData();*/}function alarmInputValidation(){if (($('#hourAlarm').val()==\"\") || ($('#minAlarm').val()==\"\")){alert('Please complete all the fields before saving.');return false;}if((parseInt($('#hourAlarm').val()) < 0) || (parseInt($('#hourAlarm').val()) > 23)){alert('Alarm hour cannot be smaller than 0 or larger than 23.');return false;}if((parseInt($('#minAlarm').val()) < 0) || (parseInt($('#minAlarm').val()) > 59)){alert('Alarm minutes cannot be smaller than 0 or larger than 59.');return false;}return true;}function alarmsave(){if (alarmInputValidation()){$.post(\"alarmsave\",{alarmOn:$(\"#alarmOn\").val(),hourAlarm: $(\"#hourAlarm\").val(),minAlarm: $(\"#minAlarm\").val()},function(data, status){if(status==\"success\"){alert(\"Alarm settings saved\");}else{alert(\"ERROR\");}});}}function alarmreset(){$.post(\"alarmreset\", function(data, status){if(status==\"success\"){alert(\"Alarm settings reset\");}else{alert(\"ERROR\");}});$('#alarmOn').val('0');$('#hourAlarm').val('');$('#minAlarm').val('');/*initLoadData();*/}function dimInputValidation(){if (($('#hourStartDim').val()==\"\") || ($('#hourStopDim').val()==\"\") || ($('#valueDim').val()==\"\")){alert('Please complete all the fields before saving.');return false;}if((parseInt($('#hourStartDim').val()) < 0) || (parseInt($('#hourStartDim').val()) > 23)){alert('Start hour cannot be smaller than 0 or larger than 23.');return false;}if((parseInt($('#hourStopDim').val()) < 0) || (parseInt($('#hourStopDim').val()) > 23)){alert('Stop hour cannot be smaller than 0 or larger than 23.');return false;}return true;}function dimsave(){if (dimInputValidation()){$.post(\"dimsave\",{dimOn:$(\"#dimOn\").val(),hourStartDim:$(\"#hourStartDim\").val(),hourStopDim: $(\"#hourStopDim\").val(),valueDim: $(\"#valueDim\").val()},function(data, status){if(status==\"success\"){alert(\"Dim settings saved\");}else{alert(\"ERROR\");}});}}function dimreset(){$.post(\"dimreset\", function(data, status){if(status==\"success\"){alert(\"Dim settings reset\");}else{alert(\"ERROR\");}});$('#dimOn').val('0');$('#hourStartDim').val('');$('#hourStopDim').val('');$('#valueDim').val('128');/*initLoadData();*/}function globalrestart(){$.post(\"globalrestart\", function(data, status){if(status==\"success\"){alert(\"Device restarting\");}else{alert(\"ERROR\");}});}function globalreset(){$.post(\"globalreset\", function(data, status){if(status==\"success\"){alert(\"Factory defaults restored\");}else{alert(\"ERROR\");}});}function colorsave(){$.post(\"colorsave\", function (data, status){});function colorload(){$.post(\"colorload\", function (data, status){});}function colorreset(){$.post(\"colorreset\", function (data, status){});}function update(){$.post(\"data\",{brightness: $(\"#brightness\").val(),hourRed: $(\"#hourRed\").val(),hourGreen: $(\"#hourGreen\").val(),hourBlue: $(\"#hourBlue\").val(),minuteRed: $(\"#minuteRed\").val(),minuteGreen: $(\"#minuteGreen\").val(),minuteBlue: $(\"#minuteBlue\").val(),secondRed: $(\"#secondRed\").val(),secondGreen: $(\"#secondGreen\").val(),secondBlue: $(\"#secondBlue\").val(),pendRed: $(\"#pendRed\").val(),pendGreen: $(\"#pendGreen\").val(),pendBlue: $(\"#pendBlue\").val(),minRed: $(\"#minRed\").val(),minGreen: $(\"#minGreen\").val(),minBlue: $(\"#minBlue\").val(),quarterRed: $(\"#quarterRed\").val(),quarterGreen: $(\"#quarterGreen\").val(),quarterBlue: $(\"#quarterBlue\").val(),mode: $(\"#mode\").val(),invert: $(\"#invert\").val()}, function(data, status){});} \
+  }</script> \ 
   </head> \ 
   <body> <div class=\"sidebar\"> <nav> <li class=\"nav-item\"> \ 
   <a href=\"#\" rel=\"section1\">Color Settings</a> \ 
@@ -375,8 +417,6 @@ AnimEaseFunction animation5 = NeoEase::QuadraticIn;
 //-------------------------------------------------------------------------------
 void setup(){
   
-  ArduinoOTA.begin();  // Starts OTA
-
   #ifdef DEBUG
     Serial.begin(115200);
   #endif 
@@ -390,7 +430,7 @@ void setup(){
 
   LoadPreferences();
 
-  uint8_t base_mac[6] = {0xB4, 0xE6, 0x2D, 0x98, 0x90, 0x11}; //B4:E6:2D:98:90:11
+  uint8_t base_mac[6] = {0xB4, 0xE6, 0x2D, 0x98, 0x90, 0x12}; //B4:E6:2D:98:90:12 was 11
   esp_base_mac_addr_set(base_mac);
 
   delay(500);
@@ -407,6 +447,10 @@ void setup(){
   WLANInit();
 
   delay(500);
+
+#ifdef USE_OTA
+  ArduinoOTA.begin();  // Starts OTA
+#endif
 
   //init and get the time
   SyncWithServer();
@@ -1022,6 +1066,30 @@ bool ValidateDim(AsyncWebServerRequest *request){
     return false;
   }
 }
+
+
+//-------------------------------------------------------------------------------
+/*  
+ *  ValidateData validates the incoming json data. 
+ *  Stores the incoming data when correct.
+ *  Returns false when something is wrong.
+ */
+/*
+bool ValidateSetData(AsnycWebServerRequest *request){
+  //List all parameters
+  int params = request->params();
+  for(int i=0;i<params;i++){
+    AsyncWebParameter* p = request->getParam(i);
+    if(p->isFile()){ //p->isPost() is also true
+      
+    }else if(p->isPost()){
+      Serial.printf("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
+    }
+  }
+  return true;
+}
+*/
+
 //-------------------------------------------------------------------------------
 /*  
  *  ValidateData validates the incoming Color data. 
@@ -1344,7 +1412,101 @@ void WebServer(void){
     ResetColor();
     request->send(200, "text/message", "");
   });
-  
+
+  server.on("/post-message", HTTP_POST, [](AsyncWebServerRequest *request){}, NULL, [](AsyncWebServerRequest *request, 
+  uint8_t *json, size_t len, size_t index, size_t total)
+  {    
+    DEBUG_PRINTLN("AsyncCallbackJsonWebHandler...");
+
+    //local copy to jsonData
+    char jsonData[len];
+    for(int i = 0;i<len;i++) {
+      jsonData[i] = (char)json[i]; 
+    }
+    
+    DEBUG_PRINTLN((const char *)jsonData); 
+    StaticJsonDocument<500> data;
+    
+    DeserializationError error = deserializeJson(data, (const char *)jsonData,len);
+    if(error){
+      DEBUG_PRINTLN(error.c_str());
+    }
+    
+    if (data.is<JsonArray>()) 
+    {        
+      DEBUG_PRINTLN("is JsonArray");
+//      deserializeJson(data, json); //deserialize json to data
+      JsonArray root = data.as<JsonArray>(); 
+      for (JsonVariant value : root) {
+          DEBUG_PRINTLN(value.as<const char*>());
+      }
+    } else if (data.is<JsonObject>()) {
+      DEBUG_PRINTLN("is JsonObject");
+//      DeserializationError error = deserializeJson(data, json);
+//      if(error){
+//        DEBUG_PRINTLN(error.c_str());
+//      }
+//      deserializeJson(data, json); //deserialie josn to data
+      JsonObject root = data.as<JsonObject>();    
+      for (JsonPair kv : root) {
+          DEBUG_PRINT(kv.key().c_str());
+          DEBUG_PRINT(": ");
+          if (kv.value().is<const char*>()) {
+            //DEBUG_PRINT("is const char*: ");
+            DEBUG_PRINTLN(kv.value().as<const char*>());
+          }else{
+            //DEBUG_PRINT("is int?: ");
+            int ival = kv.value().as<int>();
+            DEBUG_PRINTLN(ival);
+          }
+      }   
+    } else {
+      DEBUG_PRINTLN("is UNKNOWN!");
+    }
+    // validate json and set changes...
+    String response;
+    serializeJson(data, response);
+    request->send(200, "application/json", response);
+  });
+/*
+  AsyncCallbackJsonWebHandler *json_handler = new AsyncCallbackJsonWebHandler("/post-message", [](AsyncWebServerRequest *request, JsonVariant &json)
+  {    
+    DEBUG_PRINTLN("AsyncCallbackJsonWebHandler...");
+    StaticJsonDocument<500> data;
+    if (json.is<JsonArray>()) 
+    {        
+      deserializeJson(data, json); //deserialie josn to data
+      JsonArray root = data.as<JsonArray>(); 
+      DEBUG_PRINTLN("is JsonArray");
+      for (JsonVariant value : root) {
+          Serial.println(value.as<const char*>());
+      }
+    } else if (json.is<JsonObject>()) {
+      deserializeJson(data, json); //deserialie josn to data
+      JsonObject root = data.as<JsonObject>();    
+      for (JsonPair kv : root) {
+          Serial.println(kv.key().c_str());
+          Serial.println(kv.value().as<const char*>());
+      }   
+    }
+    // validate json and set changes...
+    String response;
+    serializeJson(data, response);
+    request->send(200, "application/json", response);
+  });
+
+  server.addHandler(json_handler);
+*/
+  /*
+  curl -X POST -H "Content-Type: application/json" -d '{"brightness":161,"hourRed":255,"hourGreen":0,"hourBlue":0,"minuteRed":0,"minuteGreen":255,"minuteBlue":0,"secondRed":0,"secondGreen":0,"secondBlue":255,"pendRed":0,"pendGreen":0,"pendBlue":0,"minRed":0,"minGreen":0,"minBlue":0,"quarterRed":216,"quarterGreen":215,"quarterBlue":215,"mode":1,"invert":0,"hour":"20","min":"11","sec":"26","NTP":"ptbtime1.ptb.de","GMT":1,"DST":1,"devicename":"K2400","alarmOn":0,"minAlarm":0,"hourAlarm":0,"dimOn":1,"hourStartDim":17,"hourStopDim":8,"valueDim":37}' http://localhost/post-message
+  */
+   
+/*
+  server.on("/setdata", HTTP_POST, [](AsyncWebServerRequest *request){
+    ValidateSetData(request);
+    request->send(200, "text/message", "");
+  });
+*/
   server.on("/data", HTTP_POST, [](AsyncWebServerRequest *request){
     ValidateData(request);
 
@@ -1402,9 +1564,9 @@ void WebServer(void){
  */
 //-------------------------------------------------------------------------------
 void loop(){
-
+#ifdef USE_OTA
     ArduinoOTA.handle();  // Handles OTA
-    
+#endif    
     if((WiFi.status() == WL_CONNECTED)){
     
     UDPBroadcast();
@@ -1503,7 +1665,7 @@ void CheckLocalTime(){
     SyncWithServer();
     return;
   }
-  #ifdef DEBUG
+  #ifdef DEBUG1
     Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S");
   #endif
 }
