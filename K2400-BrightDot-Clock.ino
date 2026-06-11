@@ -17,6 +17,11 @@
  * 
  * 2026 mod by hjgode
  * 
+ * BSSID K2400, Password K2400password
+ * 
+ * get settings json: curl -X POST 192.168.0.101/data
+ * set settings json: curl -X POST -H "Content-Type: application/json" -d '{"brightness":161,"hourRed":255,"hourGreen":0,"hourBlue":0,"minuteRed":0,"minuteGreen":255,"minuteBlue":0,"secondRed":0,"secondGreen":0,"secondBlue":255,"pendRed":0,"pendGreen":0,"pendBlue":0,"minRed":0,"minGreen":0,"minBlue":0,"quarterRed":216,"quarterGreen":215,"quarterBlue":215,"mode":1,"invert":0,"hour":"20","min":"11","sec":"26","NTP":"ptbtime1.ptb.de","GMT":1,"DST":1,"devicename":"K2400","alarmOn":0,"minAlarm":0,"hourAlarm":0,"dimOn":1,"hourStartDim":17,"hourStopDim":8,"valueDim":37}' http://localhost/post-message
+ * 
  * added NTPtzString
  * added ArduinoOTA
  * 
@@ -163,38 +168,457 @@ const char HTML2[] PROGMEM = {"<!doctype html> \
 .sidebar-hidden .clocktextcontainer{display:inline;}}/* Micro reset */*,*:before,*:after{box-sizing:border-box;margin:0;padding:0;}html, body{height: 100%; width: 100%;}/* HAMBURGER MENU */</style> \ 
   <script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js\"> \ 
   </script> \ 
-  <script>$(document).ready(function(){initLoadData(); $(\"input[type=range]\").mousedown(function(){sliderActive=true; console.log(\"mousedown\");}); $(\"input[type=range]\").mouseup(function(){sliderActive=false; console.log(\"mouseup\");}); $(\"input[type=range]\").keydown(function(){sliderActive=true; console.log(\"keydown\");}); $(\"input[type=range]\").keyup(function(){sliderActive=false; console.log(\"keyup\");}); $(\"input[type=range]\").on({'touchstart': function(){sliderActive=true; console.log(\"touchstart\");}}); $(\"input[type=range]\").on({'touchend': function(){sliderActive=false; console.log(\"touchend\");}}); $('.nav-item a').on('click', function(){var target=$(this).attr('rel'); $(\"#\" + target).show().siblings(\"div\").hide();}); $(\".nav-trigger\").click(function(){$(\"body\").toggleClass(\"sidebar-hidden\");$(\"nav\").toggleClass(\"nav-hidden\");}); $(\".nav-item:first a\").click();$(\".nav-item a\").click(function(){if ($(window).width() < 576){$(\"body\").toggleClass(\"sidebar-hidden\");$(\"nav\").toggleClass(\"nav-hidden\");}});if ($(window).width() < 576){$(\"body\").toggleClass(\"sidebar-hidden\");$(\"nav\").toggleClass(\"nav-hidden\");}});var sliderActive=false; window.setInterval(function(){if (!sliderActive){loadData();}}, 1000);function initLoadData(){$.post(\"data\", function (data, status){var jsonData=data; $(\"#brightness\").val(jsonData.brightness);$(\"#hourRed\").val(jsonData.hourRed);$(\"#hourGreen\").val(jsonData.hourGreen);$(\"#hourBlue\").val(jsonData.hourBlue);$(\"#minuteRed\").val(jsonData.minuteRed);$(\"#minuteGreen\").val(jsonData.minuteGreen);$(\"#minuteBlue\").val(jsonData.minuteBlue);$(\"#secondRed\").val(jsonData.secondRed);$(\"#secondGreen\").val(jsonData.secondGreen);$(\"#secondBlue\").val(jsonData.secondBlue);$(\"#pendRed\").val(jsonData.pendRed);$(\"#pendGreen\").val(jsonData.pendGreen);$(\"#pendBlue\").val(jsonData.pendBlue);$(\"#minRed\").val(jsonData.minRed);$(\"#minGreen\").val(jsonData.minGreen);$(\"#minBlue\").val(jsonData.minBlue);$(\"#quarterRed\").val(jsonData.quarterRed);$(\"#quarterGreen\").val(jsonData.quarterGreen);$(\"#quarterBlue\").val(jsonData.quarterBlue);$(\"#mode\").val(jsonData.mode);$(\"#invert\").val(jsonData.invert);$(\"#hour\").text(jsonData.hour);$(\"#min\").text(jsonData.min);$(\"#sec\").text(jsonData.sec);$(\"#hour\").text(jsonData.hour);$(\"#min\").text(jsonData.min);$(\"#sec\").text(jsonData.sec); \
-  $(\"#NTPtextbox\").val(jsonData.NTP); \
-  $(\"#NTPtztextbox\").val(jsonData.NTPtzString); \
-  $(\"#GMTtextbox\").val(jsonData.GMT); \
-  $(\"#DSTtextbox\").val(jsonData.DST); \
-  $(\"#devicename\").val(jsonData.devicename);$(\"#alarmOn\").val(jsonData.alarmOn);$(\"#minAlarm\").val(jsonData.minAlarm);$(\"#hourAlarm\").val(jsonData.hourAlarm);$(\"#dimOn\").val(jsonData.dimOn);$(\"#hourStartDim\").val(jsonData.hourStartDim);$(\"#hourStopDim\").val(jsonData.hourStopDim);$(\"#valueDim\").val(jsonData.valueDim);});}function loadData(){$.post(\"data\", function (data, status){var jsonData=data; $(\"#brightness\").val(jsonData.brightness);$(\"#hourRed\").val(jsonData.hourRed);$(\"#hourGreen\").val(jsonData.hourGreen);$(\"#hourBlue\").val(jsonData.hourBlue);$(\"#minuteRed\").val(jsonData.minuteRed);$(\"#minuteGreen\").val(jsonData.minuteGreen);$(\"#minuteBlue\").val(jsonData.minuteBlue);$(\"#secondRed\").val(jsonData.secondRed);$(\"#secondGreen\").val(jsonData.secondGreen);$(\"#secondBlue\").val(jsonData.secondBlue);$(\"#pendRed\").val(jsonData.pendRed);$(\"#pendGreen\").val(jsonData.pendGreen);$(\"#pendBlue\").val(jsonData.pendBlue);$(\"#minRed\").val(jsonData.minRed);$(\"#minGreen\").val(jsonData.minGreen);$(\"#minBlue\").val(jsonData.minBlue);$(\"#quarterRed\").val(jsonData.quarterRed);$(\"#quarterGreen\").val(jsonData.quarterGreen);$(\"#quarterBlue\").val(jsonData.quarterBlue);$(\"#mode\").val(jsonData.mode);$(\"#invert\").val(jsonData.invert);$(\"#hour\").text(jsonData.hour);$(\"#min\").text(jsonData.min);$(\"#sec\").text(jsonData.sec);$(\"#hour\").text(jsonData.hour);$(\"#min\").text(jsonData.min);$(\"#sec\").text(jsonData.sec);});} \
-  function ntpreset(){ \
-    $.post(\"ntpreset\", function(data, status){if(status==\"success\"){alert(\"NTP settings reset\");}else{alert(\"ERROR\");}}); \
-    $('#NTPtextbox').val('time.google.com'); \
-    $('#NTPtztextbox').val('CET-1CEST,M3.5.0/2,M10.5.0/3'); \
-    $('#GMTtextbox').val('0'); \
-    $('#DSTtextbox').val('0');/*initLoadData();*/} \
-  function NTPInputValidation(){ \
-    if (($('#NTPtextbox').val()==\"\") || ($('#GMTtextbox').val()==\"\") || ($('#DSTtextbox').val()==\"\")){ \
-      alert('Please complete all the fields before saving.');return false;} \
-    if ((parseFloat($('#GMTtextbox').val()) > 23) || (parseFloat($('#GMTtextbox').val()) < -23)){ \
-      alert('GMT offset cannot be smaller than -23 or bigger than 23');return false;} \
-    if ((parseFloat($('#DSTtextbox').val()) > 23) || (parseFloat($('#DSTtextbox').val()) < -23)){ \
-      alert('DST offset cannot be smaller than -23 or bigger than 23');return false;}return true;} \
-  function ntpsave(){ \
-    if (NTPInputValidation()){ \
-      $.post(\"ntpsave\",{ \
-        NTP: $(\"#NTPtextbox\").val(), \
-        NTPtzstring: $(\"#NTPtztextbox\").val(), \
-        GMT: $(\"#GMTtextbox\").val(), \
-        DST: $(\"#DSTtextbox\").val() \
-      },function(data, status){ \
-        if(status==\"success\"){alert(\"NTP settings saved\");} \
-        else{alert(\"ERROR\");}}); \
-      /*initLoadData();*/}} \
-  function wifiInputValidation(){if (($('#SSID').val()==\"\") || ($('#password').val()==\"\") || ($('#devicename').val()==\"\")){alert('Please complete all the fields before saving.');return false;}if (($('#SSID').val().length > 32)){alert('SSID cannot be longer than 32 characters');return false;}if (($('#password').val().length > 63)){alert('Password cannot be longer than 63 characters');return false;}if (($('#devicename').val().length > 16)){alert('Device name cannot be longer than 16 characters');return false;}var str=$('#devicename').val();if (str.includes(\" \")){alert('Device name cannot contains spaces');return false;}return true;}function wifisave(){if (wifiInputValidation()){$.post(\"wifisave\",{SSID: $(\"#SSID\").val(),password: $(\"#password\").val(),devicename: $(\"#devicename\").val()},function(data, status){if(status==\"success\"){alert(\"WLAN settings saved\");}else{alert(\"ERROR\");}});$('#SSID').val('');$('#password').val('');}}function wifireset(){$.post(\"wifireset\", function(data, status){if(status==\"success\"){alert(\"WLAN settings reset\");}else{alert(\"ERROR\");}});$('#SSID').val('');$('#password').val(''); $('#devicename').val('K2400');/*initLoadData();*/}function alarmInputValidation(){if (($('#hourAlarm').val()==\"\") || ($('#minAlarm').val()==\"\")){alert('Please complete all the fields before saving.');return false;}if((parseInt($('#hourAlarm').val()) < 0) || (parseInt($('#hourAlarm').val()) > 23)){alert('Alarm hour cannot be smaller than 0 or larger than 23.');return false;}if((parseInt($('#minAlarm').val()) < 0) || (parseInt($('#minAlarm').val()) > 59)){alert('Alarm minutes cannot be smaller than 0 or larger than 59.');return false;}return true;}function alarmsave(){if (alarmInputValidation()){$.post(\"alarmsave\",{alarmOn:$(\"#alarmOn\").val(),hourAlarm: $(\"#hourAlarm\").val(),minAlarm: $(\"#minAlarm\").val()},function(data, status){if(status==\"success\"){alert(\"Alarm settings saved\");}else{alert(\"ERROR\");}});}}function alarmreset(){$.post(\"alarmreset\", function(data, status){if(status==\"success\"){alert(\"Alarm settings reset\");}else{alert(\"ERROR\");}});$('#alarmOn').val('0');$('#hourAlarm').val('');$('#minAlarm').val('');/*initLoadData();*/}function dimInputValidation(){if (($('#hourStartDim').val()==\"\") || ($('#hourStopDim').val()==\"\") || ($('#valueDim').val()==\"\")){alert('Please complete all the fields before saving.');return false;}if((parseInt($('#hourStartDim').val()) < 0) || (parseInt($('#hourStartDim').val()) > 23)){alert('Start hour cannot be smaller than 0 or larger than 23.');return false;}if((parseInt($('#hourStopDim').val()) < 0) || (parseInt($('#hourStopDim').val()) > 23)){alert('Stop hour cannot be smaller than 0 or larger than 23.');return false;}return true;}function dimsave(){if (dimInputValidation()){$.post(\"dimsave\",{dimOn:$(\"#dimOn\").val(),hourStartDim:$(\"#hourStartDim\").val(),hourStopDim: $(\"#hourStopDim\").val(),valueDim: $(\"#valueDim\").val()},function(data, status){if(status==\"success\"){alert(\"Dim settings saved\");}else{alert(\"ERROR\");}});}}function dimreset(){$.post(\"dimreset\", function(data, status){if(status==\"success\"){alert(\"Dim settings reset\");}else{alert(\"ERROR\");}});$('#dimOn').val('0');$('#hourStartDim').val('');$('#hourStopDim').val('');$('#valueDim').val('128');/*initLoadData();*/}function globalrestart(){$.post(\"globalrestart\", function(data, status){if(status==\"success\"){alert(\"Device restarting\");}else{alert(\"ERROR\");}});}function globalreset(){$.post(\"globalreset\", function(data, status){if(status==\"success\"){alert(\"Factory defaults restored\");}else{alert(\"ERROR\");}});}function colorsave(){$.post(\"colorsave\", function (data, status){});function colorload(){$.post(\"colorload\", function (data, status){});}function colorreset(){$.post(\"colorreset\", function (data, status){});}function update(){$.post(\"data\",{brightness: $(\"#brightness\").val(),hourRed: $(\"#hourRed\").val(),hourGreen: $(\"#hourGreen\").val(),hourBlue: $(\"#hourBlue\").val(),minuteRed: $(\"#minuteRed\").val(),minuteGreen: $(\"#minuteGreen\").val(),minuteBlue: $(\"#minuteBlue\").val(),secondRed: $(\"#secondRed\").val(),secondGreen: $(\"#secondGreen\").val(),secondBlue: $(\"#secondBlue\").val(),pendRed: $(\"#pendRed\").val(),pendGreen: $(\"#pendGreen\").val(),pendBlue: $(\"#pendBlue\").val(),minRed: $(\"#minRed\").val(),minGreen: $(\"#minGreen\").val(),minBlue: $(\"#minBlue\").val(),quarterRed: $(\"#quarterRed\").val(),quarterGreen: $(\"#quarterGreen\").val(),quarterBlue: $(\"#quarterBlue\").val(),mode: $(\"#mode\").val(),invert: $(\"#invert\").val()}, function(data, status){});} \
-  }</script> \ 
+  <script> \ 
+  $(document).ready( \ 
+    function () { \ 
+      initLoadData(); \ 
+      $('input[type=range]').mousedown(function () { \ 
+        sliderActive = true; \ 
+        console.log('mousedown'); \ 
+      }); \ 
+      $('input[type=range]').mouseup(function () { \ 
+        sliderActive = false; \ 
+        console.log('mouseup'); \ 
+      }); \ 
+      $('input[type=range]').keydown(function () { \ 
+        sliderActive = true; \ 
+        console.log('keydown'); \ 
+      }); \ 
+      $('input[type=range]').keyup(function () { \ 
+        sliderActive = false; \ 
+        console.log('keyup'); \ 
+      }); \ 
+      $('input[type=range]').on({ \ 
+        'touchstart': function () { \ 
+          sliderActive = true; \ 
+          console.log('touchstart'); \ 
+        } \ 
+      }); \ 
+      $('input[type=range]').on({ \ 
+        'touchend': function () { \ 
+          sliderActive = false; \ 
+          console.log('touchend'); \ 
+        } \ 
+      }); \ 
+      $('.nav-item a').on( \ 
+        'click', \ 
+        function () { \ 
+          var target = $(this).attr('rel'); \ 
+          $('#' + target).show().siblings('div').hide(); \ 
+        } \ 
+      ); \ 
+      $('.nav-trigger').click( \ 
+        function () { \ 
+          $('body').toggleClass('sidebar-hidden'); \ 
+          $('nav').toggleClass('nav-hidden'); \ 
+        } \ 
+      ); \ 
+      $('.nav-item:first a').click(); \ 
+      $('.nav-item a').click( \ 
+        function () { \ 
+          if ($(window).width() < 576) { \ 
+            $('body').toggleClass('sidebar-hidden'); \ 
+            $('nav').toggleClass('nav-hidden'); \ 
+          } \ 
+        } \ 
+      ); \ 
+      if ($(window).width() < 576) { \ 
+        $('body').toggleClass('sidebar-hidden'); \ 
+        $('nav').toggleClass('nav-hidden'); \ 
+      } \ 
+    } \ 
+  ); \ 
+  var sliderActive = false; \ 
+  window.setInterval(function () { \ 
+    if (!sliderActive) { \ 
+      loadData(); \ 
+    } \ 
+  }, 1000); \ 
+  function initLoadData() { \ 
+    $.post( \ 
+      'data', \ 
+      function (data, status) { \ 
+        var jsonData = data; \ 
+        $('#brightness').val(jsonData.brightness); \ 
+        $('#hourRed').val(jsonData.hourRed); \ 
+        $('#hourGreen').val(jsonData.hourGreen); \ 
+        $('#hourBlue').val(jsonData.hourBlue); \ 
+        $('#minuteRed').val(jsonData.minuteRed); \ 
+        $('#minuteGreen').val(jsonData.minuteGreen); \ 
+        $('#minuteBlue').val(jsonData.minuteBlue); \ 
+        $('#secondRed').val(jsonData.secondRed); \ 
+        $('#secondGreen').val(jsonData.secondGreen); \ 
+        $('#secondBlue').val(jsonData.secondBlue); \ 
+        $('#pendRed').val(jsonData.pendRed); \ 
+        $('#pendGreen').val(jsonData.pendGreen); \ 
+        $('#pendBlue').val(jsonData.pendBlue); \ 
+        $('#minRed').val(jsonData.minRed); \ 
+        $('#minGreen').val(jsonData.minGreen); \ 
+        $('#minBlue').val(jsonData.minBlue); \ 
+        $('#quarterRed').val(jsonData.quarterRed); \ 
+        $('#quarterGreen').val(jsonData.quarterGreen); \ 
+        $('#quarterBlue').val(jsonData.quarterBlue); \ 
+        $('#mode').val(jsonData.mode); \ 
+        $('#invert').val(jsonData.invert); \ 
+        $('#hour').text(jsonData.hour); \ 
+        $('#min').text(jsonData.min); \ 
+        $('#sec').text(jsonData.sec); \ 
+        $('#hour').text(jsonData.hour); \ 
+        $('#min').text(jsonData.min); \ 
+        $('#sec').text(jsonData.sec); \ 
+        $('#NTPtextbox').val(jsonData.NTP); \ 
+        $('#NTPtztextbox').val(jsonData.NTPtzString); \ 
+        $('#GMTtextbox').val(jsonData.GMT); \ 
+        $('#DSTtextbox').val(jsonData.DST); \ 
+        $('#devicename').val(jsonData.devicename); \ 
+        $('#alarmOn').val(jsonData.alarmOn); \ 
+        $('#minAlarm').val(jsonData.minAlarm); \ 
+        $('#hourAlarm').val(jsonData.hourAlarm); \ 
+        $('#dimOn').val(jsonData.dimOn); \ 
+        $('#hourStartDim').val(jsonData.hourStartDim); \ 
+        $('#hourStopDim').val(jsonData.hourStopDim); \ 
+        $('#valueDim').val(jsonData.valueDim); \ 
+      } \ 
+    ); \ 
+  } \ 
+  function loadData() { \ 
+    $.post( \ 
+      'data', \ 
+      function (data, status) { \ 
+        var jsonData = data; \ 
+        $('#brightness').val(jsonData.brightness); \ 
+        $('#hourRed').val(jsonData.hourRed); \ 
+        $('#hourGreen').val(jsonData.hourGreen); \ 
+        $('#hourBlue').val(jsonData.hourBlue); \ 
+        $('#minuteRed').val(jsonData.minuteRed); \ 
+        $('#minuteGreen').val(jsonData.minuteGreen); \ 
+        $('#minuteBlue').val(jsonData.minuteBlue); \ 
+        $('#secondRed').val(jsonData.secondRed); \ 
+        $('#secondGreen').val(jsonData.secondGreen); \ 
+        $('#secondBlue').val(jsonData.secondBlue); \ 
+        $('#pendRed').val(jsonData.pendRed); \ 
+        $('#pendGreen').val(jsonData.pendGreen); \ 
+        $('#pendBlue').val(jsonData.pendBlue); \ 
+        $('#minRed').val(jsonData.minRed); \ 
+        $('#minGreen').val(jsonData.minGreen); \ 
+        $('#minBlue').val(jsonData.minBlue); \ 
+        $('#quarterRed').val(jsonData.quarterRed); \ 
+        $('#quarterGreen').val(jsonData.quarterGreen); \ 
+        $('#quarterBlue').val(jsonData.quarterBlue); \ 
+        $('#mode').val(jsonData.mode); \ 
+        $('#invert').val(jsonData.invert); \ 
+        $('#hour').text(jsonData.hour); \ 
+        $('#min').text(jsonData.min); \ 
+        $('#sec').text(jsonData.sec); \ 
+        $('#hour').text(jsonData.hour); \ 
+        $('#min').text(jsonData.min); \ 
+        $('#sec').text(jsonData.sec); \ 
+      } \ 
+    ); \ 
+  } \ 
+  function ntpreset() { \ 
+    $.post( \ 
+      'ntpreset', \ 
+      function (data, status) { \ 
+        if (status == 'success') { \ 
+          alert('NTP settings reset'); \ 
+        } else { \ 
+          alert('ERROR'); \ 
+        } \ 
+      } \ 
+    ); \ 
+    $('#NTPtextbox').val('time.google.com'); \ 
+    $('#NTPtztextbox').val('CET-1CEST,M3.5.0/2,M10.5.0/3'); \ 
+    $('#GMTtextbox').val('0'); \ 
+    $('#DSTtextbox').val('0'); /*initLoadData();*/  \ 
+  } \ 
+  function NTPInputValidation() { \ 
+    if ( \ 
+      ($('#NTPtextbox').val() == '') || \ 
+      ($('#GMTtextbox').val() == '') || \ 
+      ($('#DSTtextbox').val() == '') \ 
+    ) { \ 
+      alert('Please complete all the fields before saving.'); \ 
+      return false; \ 
+    } \ 
+    if ( \ 
+      (parseFloat($('#GMTtextbox').val()) > 23) || \ 
+      (parseFloat($('#GMTtextbox').val()) < - 23) \ 
+    ) { \ 
+      alert('GMT offset cannot be smaller than -23 or bigger than 23'); \ 
+      return false; \ 
+    } \ 
+    if ( \ 
+      (parseFloat($('#DSTtextbox').val()) > 23) || \ 
+      (parseFloat($('#DSTtextbox').val()) < - 23) \ 
+    ) { \ 
+      alert('DST offset cannot be smaller than -23 or bigger than 23'); \ 
+      return false; \ 
+    } \ 
+    return true; \ 
+  } \ 
+  function ntpsave() { \ 
+    if (NTPInputValidation()) { \ 
+      $.post( \ 
+        'ntpsave', \ 
+        { \ 
+          NTP: $('#NTPtextbox').val(), \ 
+          NTPtzstring: $('#NTPtztextbox').val(), \ 
+          GMT: $('#GMTtextbox').val(), \ 
+          DST: $('#DSTtextbox').val() \ 
+        }, \ 
+        function (data, status) { \ 
+          if (status == 'success') { \ 
+            alert('NTP settings saved'); \ 
+          } else { \ 
+            alert('ERROR'); \ 
+          } \ 
+        } \ 
+      ); /*initLoadData();*/  \ 
+    } \ 
+  } \ 
+  function wifiInputValidation() { \ 
+    if ( \ 
+      ($('#SSID').val() == '') || \ 
+      ($('#password').val() == '') || \ 
+      ($('#devicename').val() == '') \ 
+    ) { \ 
+      alert('Please complete all the fields before saving.'); \ 
+      return false; \ 
+    } \ 
+    if (($('#SSID').val().length > 32)) { \ 
+      alert('SSID cannot be longer than 32 characters'); \ 
+      return false; \ 
+    } \ 
+    if (($('#password').val().length > 63)) { \ 
+      alert('Password cannot be longer than 63 characters'); \ 
+      return false; \ 
+    } \ 
+    if (($('#devicename').val().length > 16)) { \ 
+      alert('Device name cannot be longer than 16 characters'); \ 
+      return false; \ 
+    } \ 
+    var str = $('#devicename').val(); \ 
+    if (str.includes(' ')) { \ 
+      alert('Device name cannot contains spaces'); \ 
+      return false; \ 
+    } \ 
+    return true; \ 
+  } \ 
+  function wifisave() { \ 
+    if (wifiInputValidation()) { \ 
+      $.post( \ 
+        'wifisave', \ 
+        { \ 
+          SSID: $('#SSID').val(), \ 
+          password: $('#password').val(), \ 
+          devicename: $('#devicename').val() \ 
+        }, \ 
+        function (data, status) { \ 
+          if (status == 'success') { \ 
+            alert('WLAN settings saved'); \ 
+          } else { \ 
+            alert('ERROR'); \ 
+          } \ 
+        } \ 
+      ); \ 
+      $('#SSID').val(''); \ 
+      $('#password').val(''); \ 
+    } \ 
+  } \ 
+  function wifireset() { \ 
+    $.post( \ 
+      'wifireset', \ 
+      function (data, status) { \ 
+        if (status == 'success') { \ 
+          alert('WLAN settings reset'); \ 
+        } else { \ 
+          alert('ERROR'); \ 
+        } \ 
+      } \ 
+    ); \ 
+    $('#SSID').val(''); \ 
+    $('#password').val(''); \ 
+    $('#devicename').val('K2400'); /*initLoadData();*/  \ 
+  } \ 
+  function alarmInputValidation() { \ 
+    if (($('#hourAlarm').val() == '') || ($('#minAlarm').val() == '')) { \ 
+      alert('Please complete all the fields before saving.'); \ 
+      return false; \ 
+    } \ 
+    if ( \ 
+      (parseInt($('#hourAlarm').val()) < 0) || \ 
+      (parseInt($('#hourAlarm').val()) > 23) \ 
+    ) { \ 
+      alert('Alarm hour cannot be smaller than 0 or larger than 23.'); \ 
+      return false; \ 
+    } \ 
+    if ( \ 
+      (parseInt($('#minAlarm').val()) < 0) || \ 
+      (parseInt($('#minAlarm').val()) > 59) \ 
+    ) { \ 
+      alert('Alarm minutes cannot be smaller than 0 or larger than 59.'); \ 
+      return false; \ 
+    } \ 
+    return true; \ 
+  } \ 
+  function alarmsave() { \ 
+    if (alarmInputValidation()) { \ 
+      $.post( \ 
+        'alarmsave', \ 
+        { \ 
+          alarmOn: $('#alarmOn').val(), \ 
+          hourAlarm: $('#hourAlarm').val(), \ 
+          minAlarm: $('#minAlarm').val() \ 
+        }, \ 
+        function (data, status) { \ 
+          if (status == 'success') { \ 
+            alert('Alarm settings saved'); \ 
+          } else { \ 
+            alert('ERROR'); \ 
+          } \ 
+        } \ 
+      ); \ 
+    } \ 
+  } \ 
+  function alarmreset() { \ 
+    $.post( \ 
+      'alarmreset', \ 
+      function (data, status) { \ 
+        if (status == 'success') { \ 
+          alert('Alarm settings reset'); \ 
+        } else { \ 
+          alert('ERROR'); \ 
+        } \ 
+      } \ 
+    ); \ 
+    $('#alarmOn').val('0'); \ 
+    $('#hourAlarm').val(''); \ 
+    $('#minAlarm').val(''); /*initLoadData();*/  \ 
+  } \ 
+  function dimInputValidation() { \ 
+    if ( \ 
+      ($('#hourStartDim').val() == '') || \ 
+      ($('#hourStopDim').val() == '') || \ 
+      ($('#valueDim').val() == '') \ 
+    ) { \ 
+      alert('Please complete all the fields before saving.'); \ 
+      return false; \ 
+    } \ 
+    if ( \ 
+      (parseInt($('#hourStartDim').val()) < 0) || \ 
+      (parseInt($('#hourStartDim').val()) > 23) \ 
+    ) { \ 
+      alert('Start hour cannot be smaller than 0 or larger than 23.'); \ 
+      return false; \ 
+    } \ 
+    if ( \ 
+      (parseInt($('#hourStopDim').val()) < 0) || \ 
+      (parseInt($('#hourStopDim').val()) > 23) \ 
+    ) { \ 
+      alert('Stop hour cannot be smaller than 0 or larger than 23.'); \ 
+      return false; \ 
+    } \ 
+    return true; \ 
+  } \ 
+  function dimsave() { \ 
+    if (dimInputValidation()) { \ 
+      $.post( \ 
+        'dimsave', \ 
+        { \ 
+          dimOn: $('#dimOn').val(), \ 
+          hourStartDim: $('#hourStartDim').val(), \ 
+          hourStopDim: $('#hourStopDim').val(), \ 
+          valueDim: $('#valueDim').val() \ 
+        }, \ 
+        function (data, status) { \ 
+          if (status == 'success') { \ 
+            alert('Dim settings saved'); \ 
+          } else { \ 
+            alert('ERROR'); \ 
+          } \ 
+        } \ 
+      ); \ 
+    } \ 
+  } \ 
+  function dimreset() { \ 
+    $.post( \ 
+      'dimreset', \ 
+      function (data, status) { \ 
+        if (status == 'success') { \ 
+          alert('Dim settings reset'); \ 
+        } else { \ 
+          alert('ERROR'); \ 
+        } \ 
+      } \ 
+    ); \ 
+    $('#dimOn').val('0'); \ 
+    $('#hourStartDim').val(''); \ 
+    $('#hourStopDim').val(''); \ 
+    $('#valueDim').val('128'); /*initLoadData();*/  \ 
+  } \ 
+  function globalrestart() { \ 
+    $.post( \ 
+      'globalrestart', \ 
+      function (data, status) { \ 
+        if (status == 'success') { \ 
+          alert('Device restarting'); \ 
+        } else { \ 
+          alert('ERROR'); \ 
+        } \ 
+      } \ 
+    ); \ 
+  } \ 
+  function globalreset() { \ 
+    $.post( \ 
+      'globalreset', \ 
+      function (data, status) { \ 
+        if (status == 'success') { \ 
+          alert('Factory defaults restored'); \ 
+        } else { \ 
+          alert('ERROR'); \ 
+        } \ 
+      } \ 
+    ); \ 
+  } \ 
+  function colorsave() { \ 
+    $.post('colorsave', function (data, status) {}); \
+  } \
+  function colorload() { \ 
+    $.post('colorload', function (data, status) {}); \ 
+  } \ 
+  function colorreset() { \ 
+    $.post('colorreset', function (data, status) {}); \ 
+  } \ 
+  function update() { \ 
+    $.post( \ 
+      'data', \ 
+      { \ 
+        brightness: $('#brightness').val(), \ 
+        hourRed: $('#hourRed').val(), \ 
+        hourGreen: $('#hourGreen').val(), \ 
+        hourBlue: $('#hourBlue').val(), \ 
+        minuteRed: $('#minuteRed').val(), \ 
+        minuteGreen: $('#minuteGreen').val(), \ 
+        minuteBlue: $('#minuteBlue').val(), \ 
+        secondRed: $('#secondRed').val(), \ 
+        secondGreen: $('#secondGreen').val(), \ 
+        secondBlue: $('#secondBlue').val(), \ 
+        pendRed: $('#pendRed').val(), \ 
+        pendGreen: $('#pendGreen').val(), \ 
+        pendBlue: $('#pendBlue').val(), \ 
+        minRed: $('#minRed').val(), \ 
+        minGreen: $('#minGreen').val(), \ 
+        minBlue: $('#minBlue').val(), \ 
+        quarterRed: $('#quarterRed').val(), \ 
+        quarterGreen: $('#quarterGreen').val(), \ 
+        quarterBlue: $('#quarterBlue').val(), \ 
+        mode: $('#mode').val(), \ 
+        invert: $('#invert').val() \ 
+      }, \ 
+      function (data, status) {}); } \ 
+ \ 
+</script> \ 
   </head> \ 
   <body> <div class=\"sidebar\"> <nav> <li class=\"nav-item\"> \ 
   <a href=\"#\" rel=\"section1\">Color Settings</a> \ 
@@ -215,7 +639,8 @@ const char HTML2[] PROGMEM = {"<!doctype html> \
   </span> <span class=\"line\"> \ 
   </span> </span> </span> <span class=\"clocktextcontainer\"> <span class=\"text\" id=\"hour\">00</span> <span class=\"text\">:</span> <span class=\"text\" id=\"min\">00</span> <span class=\"text\">:</span> <span class=\"text\" id=\"sec\">00</span> </span> </header> </div> \ 
   <main> <article> <div id=\"section1\"> <div class=\"propertycontainersmall\"> <p>Brightness</p> \ 
-  <div class=\"slidecontainer\"> <input type=\"range\" min=\"0\" max=\"255\" value=\"128\" class=\"slider white\" id=\"brightness\" onChange=\"update()\"> </div> \ 
+  <div class=\"slidecontainer\"> \
+  <input type=\"range\" min=\"0\" max=\"255\" value=\"128\" class=\"slider white\" id=\"brightness\" onChange=\"update()\"> </div> \ 
   </div> \ 
   <div class=\"propertycontainer\"> <p>Display mode</p> \ 
   <div class=\"slidecontainer\"> <input type=\"range\" min=\"0\" max=\"8\" value=\"0\" class=\"slider white\" id=\"mode\" onChange=\"update()\"> </div> \ 
@@ -1070,28 +1495,6 @@ bool ValidateDim(AsyncWebServerRequest *request){
 
 //-------------------------------------------------------------------------------
 /*  
- *  ValidateData validates the incoming json data. 
- *  Stores the incoming data when correct.
- *  Returns false when something is wrong.
- */
-/*
-bool ValidateSetData(AsnycWebServerRequest *request){
-  //List all parameters
-  int params = request->params();
-  for(int i=0;i<params;i++){
-    AsyncWebParameter* p = request->getParam(i);
-    if(p->isFile()){ //p->isPost() is also true
-      
-    }else if(p->isPost()){
-      Serial.printf("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
-    }
-  }
-  return true;
-}
-*/
-
-//-------------------------------------------------------------------------------
-/*  
  *  ValidateData validates the incoming Color data. 
  *  Stores the incoming data when correct.
  *  Returns false when something is wrong.
@@ -1458,7 +1861,10 @@ void WebServer(void){
             //DEBUG_PRINT("is int?: ");
             int ival = kv.value().as<int>();
             DEBUG_PRINTLN(ival);
+            SaveIntByName(kv.key().c_str(), ival);
           }
+//          SaveColor(); //local changes
+//          LoadColor();
       }   
     } else {
       DEBUG_PRINTLN("is UNKNOWN!");
@@ -1468,45 +1874,10 @@ void WebServer(void){
     serializeJson(data, response);
     request->send(200, "application/json", response);
   });
-/*
-  AsyncCallbackJsonWebHandler *json_handler = new AsyncCallbackJsonWebHandler("/post-message", [](AsyncWebServerRequest *request, JsonVariant &json)
-  {    
-    DEBUG_PRINTLN("AsyncCallbackJsonWebHandler...");
-    StaticJsonDocument<500> data;
-    if (json.is<JsonArray>()) 
-    {        
-      deserializeJson(data, json); //deserialie josn to data
-      JsonArray root = data.as<JsonArray>(); 
-      DEBUG_PRINTLN("is JsonArray");
-      for (JsonVariant value : root) {
-          Serial.println(value.as<const char*>());
-      }
-    } else if (json.is<JsonObject>()) {
-      deserializeJson(data, json); //deserialie josn to data
-      JsonObject root = data.as<JsonObject>();    
-      for (JsonPair kv : root) {
-          Serial.println(kv.key().c_str());
-          Serial.println(kv.value().as<const char*>());
-      }   
-    }
-    // validate json and set changes...
-    String response;
-    serializeJson(data, response);
-    request->send(200, "application/json", response);
-  });
-
-  server.addHandler(json_handler);
-*/
   /*
   curl -X POST -H "Content-Type: application/json" -d '{"brightness":161,"hourRed":255,"hourGreen":0,"hourBlue":0,"minuteRed":0,"minuteGreen":255,"minuteBlue":0,"secondRed":0,"secondGreen":0,"secondBlue":255,"pendRed":0,"pendGreen":0,"pendBlue":0,"minRed":0,"minGreen":0,"minBlue":0,"quarterRed":216,"quarterGreen":215,"quarterBlue":215,"mode":1,"invert":0,"hour":"20","min":"11","sec":"26","NTP":"ptbtime1.ptb.de","GMT":1,"DST":1,"devicename":"K2400","alarmOn":0,"minAlarm":0,"hourAlarm":0,"dimOn":1,"hourStartDim":17,"hourStopDim":8,"valueDim":37}' http://localhost/post-message
   */
    
-/*
-  server.on("/setdata", HTTP_POST, [](AsyncWebServerRequest *request){
-    ValidateSetData(request);
-    request->send(200, "text/message", "");
-  });
-*/
   server.on("/data", HTTP_POST, [](AsyncWebServerRequest *request){
     ValidateData(request);
 
@@ -1815,6 +2186,7 @@ void SaveNTP(void){
  */
 //-------------------------------------------------------------------------------
 void ResetColor(void){
+  DEBUG_PRINTLN("ResetColor...");
   preferences.begin("color", false);
   preferences.clear();
   preferences.putUInt("colorStored", 0);
@@ -1852,6 +2224,8 @@ void ResetColor(void){
  */
 //-------------------------------------------------------------------------------
 void LoadColor(void){
+  DEBUG_PRINTLN("LoadColor...");
+
   preferences.begin("color", false);
   totalBrightness = preferences.getUInt("brightness", 255);
   hourHandColor.R = preferences.getUInt("hourRed", 255);
@@ -1881,12 +2255,61 @@ void LoadColor(void){
   DEBUG_PRINTLN("Color settings loaded...");
   DEBUG_PRINTLN("");
 }
+
+//*****************************************************
+void SaveIntByName(const char * sett_name, int wert){
+  DEBUG_PRINTLN("SaveIntByName...");
+  if ( sett_name == "brightness")
+    totalBrightness = wert;
+  else if (sett_name == "hourRed") 
+     hourHandColor.R = wert;
+  else if (sett_name == "hourGreen") 
+     hourHandColor.G = wert;
+  else if (sett_name == "hourBlue") 
+     hourHandColor.B = wert;
+  else if (sett_name == "minuteRed") 
+     minuteHandColor.R = wert;
+  else if (sett_name == "minuteGreen") 
+     minuteHandColor.G = wert;
+  else if (sett_name == "minuteBlue") 
+     minuteHandColor.B = wert;
+  else if (sett_name == "secondRed") 
+     secondHandColor.R = wert;
+  else if (sett_name == "secondGreen") 
+     secondHandColor.G = wert;
+  else if (sett_name == "secondBlue") 
+     secondHandColor.B = wert;
+  else if (sett_name == "pendRed") 
+     pendantColor.R = wert;
+  else if (sett_name == "pendGreen") 
+     pendantColor.G = wert;
+  else if (sett_name == "pendBlue") 
+     pendantColor.B = wert;
+  else if (sett_name == "minRed") 
+     fiveMinuteColor.R = wert;
+  else if (sett_name == "minGreen") 
+     fiveMinuteColor.G = wert;
+  else if (sett_name == "minBlue") 
+     fiveMinuteColor.B = wert;
+  else if (sett_name == "quarterRed") 
+     quarterColor.R = wert;
+  else if (sett_name == "quarterGreen") 
+     quarterColor.G = wert;
+  else if (sett_name == "quarterBlue") 
+     quarterColor.B = wert;
+  else if (sett_name == "mode") 
+     animationState = wert;
+  else if (sett_name == "invert") 
+     invert = wert;
+}
+
 //-------------------------------------------------------------------------------
 /*  
  *  SaveColor will save Color data to non-volatile memory.
  */
 //-------------------------------------------------------------------------------
 void SaveColor(void){
+  DEBUG_PRINTLN("SaveColor...");
   preferences.begin("color", false);
   preferences.putUInt("colorStored", 1);
   preferences.putUInt("brightness", totalBrightness);
