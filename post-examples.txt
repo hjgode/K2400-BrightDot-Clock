@@ -1,0 +1,13 @@
+curl -X POST -H "Content-Type: application/json" -d '{"brightness":69,"hourRed":255,"hourGreen":0,"hourBlue":0,"minuteRed":0,"minuteGreen":255,"minuteBlue":0,"secondRed":0,"secondGreen":0,"secondBlue":255,"pendRed":0,"pendGreen":0,"pendBlue":0,"minRed":0,"minGreen":0,"minBlue":0,"quarterRed":34,"quarterGreen":0,"quarterBlue":0,"mode":0,"invert":0,"hour":"10","min":"29","sec":"28","NTP":"de.pool.ntp.org","NTPtzstring":"CET-1CEST,M3.5.0/03,M10.5.0/03","GMT":0,"DST":0,"devicename":"K2400","alarmOn":0,"minAlarm":0,"hourAlarm":0,"dimOn":0,"hourStartDim":0,"hourStopDim":0,"valueDim":0}' http://192.168.0.101/data
+
+curl -X POST -H "Content-Type: application/json" -d '{"brightness":60,"hourRed":255,"hourGreen":0,"hourBlue":0,"minuteRed":0,"minuteGreen":255,"minuteBlue":0,"secondRed":0,"secondGreen":0,"secondBlue":255,"pendRed":0,"pendGreen":0,"pendBlue":0,"minRed":0,"minGreen":0,"minBlue":0,"quarterRed":216,"quarterGreen":215,"quarterBlue":215,"mode":1,"invert":0}' http://192.168.0.101/post-message
+OK
+
+curl -X POST -H "Content-Type: application/json" -d '{"brightness":60,"hourRed":255,"hourGreen":0,"hourBlue":0,"minuteRed":0,"minuteGreen":255,"minuteBlue":0,"secondRed":0,"secondGreen":0,"secondBlue":255,"pendRed":0,"pendGreen":0,"pendBlue":0,"minRed":0,"minGreen":0,"minBlue":0,"quarterRed":216,"quarterGreen":215,"quarterBlue":215,"mode":1,"invert":0}' http://192.168.0.101/data
+
+
+curl -X POST -d 'brightness=160&hourRed=255&hourGreen=0&hourBlue=0&minuteRed=0&minuteGreen=255&minuteBlue=0&secondRed=0&secondGreen=0&secondBlue=255&pendRed=0&pendGreen=0&pendBlue=0&minRed=0&minGreen=0&minBlue=0&quarterRed=216&quarterGreen=215&quarterBlue=215&mode=1&invert=0' http://192.168.0.101/data
+OK
+
+curl -X POST -d 'brightness=60&hourRed=255&hourGreen=0&hourBlue=0&minuteRed=0&minuteGreen=255&minuteBlue=0&secondRed=0&secondGreen=0&secondBlue=255&pendRed=0&pendGreen=0&pendBlue=0&minRed=0&minGreen=0&minBlue=0&quarterRed=216&quarterGreen=215&quarterBlue=215&mode=1&invert=0' http://192.168.0.101/data
+OK
