@@ -37,3 +37,12 @@ Restart K2400 Clock:
 
     curl -X POST http://<ip-adress>/globalrestart
 
+For correct DST handling, NTPtzString was added:
+
+  /* for correct tz and DST, see https://github.com/espressif/arduino-esp32/issues/3797
+  ie: Europe 	Berlin,Germany 	CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00
+
+
+  const char * NTPpool         = ntpServer; //"nl.pool.ntp.org";
+  const char * defaultTimezone = "CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00"; //"CET-1CEST,M3.5.0/2,M10.5.0/3";
+
