@@ -4,7 +4,7 @@
 //the order of includes is important
 #include <ArduinoJson.h>
 
-#undef USE_OTA
+//#define USE_OTA
 #ifdef USE_OTA
 #include <ArduinoOTA.h>
 #endif
@@ -19,8 +19,22 @@
  * 
  * BSSID K2400, Password K2400password
  * 
+ * restart:
+ * curl -X POST 192.168.0.129/globalrestart
+ * 
  * get settings json: curl -X POST 192.168.0.101/data
- * set settings json: curl -X POST -H "Content-Type: application/json" -d '{"brightness":161,"hourRed":255,"hourGreen":0,"hourBlue":0,"minuteRed":0,"minuteGreen":255,"minuteBlue":0,"secondRed":0,"secondGreen":0,"secondBlue":255,"pendRed":0,"pendGreen":0,"pendBlue":0,"minRed":0,"minGreen":0,"minBlue":0,"quarterRed":216,"quarterGreen":215,"quarterBlue":215,"mode":1,"invert":0,"hour":"20","min":"11","sec":"26","NTP":"ptbtime1.ptb.de","GMT":1,"DST":1,"devicename":"K2400","alarmOn":0,"minAlarm":0,"hourAlarm":0,"dimOn":1,"hourStartDim":17,"hourStopDim":8,"valueDim":37}' http://localhost/post-message
+ * set color settings json: curl -X POST -H "Content-Type: application/json" -d '{"brightness":60,"hourRed":255,"hourGreen":0,"hourBlue":0,"minuteRed":0,"minuteGreen":255,"minuteBlue":0,"secondRed":0,"secondGreen":0,"secondBlue":255,"pendRed":0,"pendGreen":0,"pendBlue":0,"minRed":0,"minGreen":0,"minBlue":0,"quarterRed":216,"quarterGreen":215,"quarterBlue":215,"mode":1,"invert":0}' http://192.168.0.101/post-message
+ * 
+ * set color settings json: curl -X POST -H "Content-Type: application/json" -d '{"brightness":60,"hourRed":255,"hourGreen":0,"hourBlue":0,"minuteRed":0,"minuteGreen":255,"minuteBlue":0,"secondRed":0,"secondGreen":0,"secondBlue":255,"pendRed":0,"pendGreen":0,"pendBlue":0,"minRed":0,"minGreen":0,"minBlue":0,"quarterRed":216,"quarterGreen":215,"quarterBlue":215,"mode":1,"invert":0}' http://192.168.0.101/data
+ * 
+ * immediate change:
+ * curl -X POST  -d 'brightness=160&hourRed=255&hourGreen=0&hourBlue=0&minuteRed=0&minuteGreen=255&minuteBlue=0&secondRed=0&secondGreen=0&secondBlue=255&pendRed=0&pendGreen=0&pendBlue=0&minRed=0&minGreen=0&minBlue=0&quarterRed=216&quarterGreen=215&quarterBlue=215&mode=1&invert=0' http://192.168.0.101/data
+ * 
+ * set NTP 3 or 4 params: gmtOffsetHour=<float>&NTPData=<float>&NTPString=<string>[&NTPTZString=<string>]
+ * curl -X POST -d 'gmtOffsetHour=<float>&NTPData=<float>&NTPString=<string>[&NTPTZString=<string>]' http://192.168.0.101/ntpsave
+ * 
+ * DimSave
+ * curl -X POST -d 'dimOn=<0|1>&hourStartDim=<int>&hourStopDim=<int>&valueDim=<int>' http://192.168.0.101/dimsave
  * 
  * added NTPtzString
  * added ArduinoOTA
@@ -1316,6 +1330,7 @@ void MDNSService(String URL){
 //-------------------------------------------------------------------------------
 bool ValidateNTP(AsyncWebServerRequest *request){
   int paramsNr = request->params();
+  //gmtOffsetHour=<float>&NTPData=<float>&NTPString=<string>
   if(paramsNr == 3){
     //hgode
     const AsyncWebParameter* p = request->getParam(0);
@@ -1329,7 +1344,7 @@ bool ValidateNTP(AsyncWebServerRequest *request){
     NTPData = p->value();
     daylightOffset_hour = NTPData.toFloat();
   }
-  else if(paramsNr == 4){
+  else if(paramsNr == 4){   //gmtOffsetHour=<float>&NTPData=<float>&NTPString=<string>&NTPTZString=<string>
     //hgode
     const AsyncWebParameter* p = request->getParam(0);
     NTPstring = p->value();
@@ -1440,8 +1455,10 @@ bool ValidateAlarm(AsyncWebServerRequest *request){
 //-------------------------------------------------------------------------------
 /*  
  *  ValidateDim validates the incoming Auto Dim data. 
+ *  hourstartdim=<dimon=<0|1>&houtStartDim=<int>&horStopDim=<int>
  *  Stores the incoming data when correct.
  *  Returns false when something is wrong.
+ *  /dimsave -d 'dimOn=<0|1>&hourStartDim=<int>&houtStopDim=<int>&valueDim=<int>'
  */
 //-------------------------------------------------------------------------------
 bool ValidateDim(AsyncWebServerRequest *request){
@@ -1502,7 +1519,15 @@ bool ValidateDim(AsyncWebServerRequest *request){
 //-------------------------------------------------------------------------------
 bool ValidateData(AsyncWebServerRequest *request){
   int paramsNr = request->params();
+  DEBUG_PRINT("ValidateData...");
   if(paramsNr == 21){
+    for (int x=0; x<21; x++){
+      DEBUG_PRINT(x);
+      DEBUG_PRINT(": ");
+      DEBUG_PRINT(request->getParam(x)->value());
+      DEBUG_PRINT(" : ");
+      DEBUG_PRINTLN(request->getParam(x)->name());
+    }
     //hgode
     const AsyncWebParameter* p = request->getParam(0);
     validationString = p->value();
@@ -1696,6 +1721,7 @@ bool ValidateData(AsyncWebServerRequest *request){
     return true;
   }
   else {
+    DEBUG_PRINT("ValidateData  incorrect number of params (not 21)");
     return false;
   }
 }
@@ -1716,7 +1742,7 @@ void WebServer(void){
   });
 
   server.on("/ntpsave", HTTP_POST, [](AsyncWebServerRequest *request){
-    
+    //3 or 4 params: gmtOffsetHour=<float>&NTPData=<float>&NTPString=<string>[&NTPTZString=<string>]
     if (ValidateNTP(request)){
       SaveNTP();
       SyncWithServer();  
@@ -1816,6 +1842,7 @@ void WebServer(void){
     request->send(200, "text/message", "");
   });
 
+  //json data receive for color settings
   server.on("/post-message", HTTP_POST, [](AsyncWebServerRequest *request){}, NULL, [](AsyncWebServerRequest *request, 
   uint8_t *json, size_t len, size_t index, size_t total)
   {    
@@ -1874,10 +1901,13 @@ void WebServer(void){
     serializeJson(data, response);
     request->send(200, "application/json", response);
   });
+
   /*
   curl -X POST -H "Content-Type: application/json" -d '{"brightness":161,"hourRed":255,"hourGreen":0,"hourBlue":0,"minuteRed":0,"minuteGreen":255,"minuteBlue":0,"secondRed":0,"secondGreen":0,"secondBlue":255,"pendRed":0,"pendGreen":0,"pendBlue":0,"minRed":0,"minGreen":0,"minBlue":0,"quarterRed":216,"quarterGreen":215,"quarterBlue":215,"mode":1,"invert":0,"hour":"20","min":"11","sec":"26","NTP":"ptbtime1.ptb.de","GMT":1,"DST":1,"devicename":"K2400","alarmOn":0,"minAlarm":0,"hourAlarm":0,"dimOn":1,"hourStartDim":17,"hourStopDim":8,"valueDim":37}' http://localhost/post-message
   */
    
+  //json data receive for color settings
+  // curl -X POST  -d 'brightness=160&hourRed=255&hourGreen=0&hourBlue=0&minuteRed=0&minuteGreen=255&minuteBlue=0&secondRed=0&secondGreen=0&secondBlue=255&pendRed=0&pendGreen=0&pendBlue=0&minRed=0&minGreen=0&minBlue=0&quarterRed=216&quarterGreen=215&quarterBlue=215&mode=1&invert=0' http://192.168.0.101/data
   server.on("/data", HTTP_POST, [](AsyncWebServerRequest *request){
     ValidateData(request);
 
@@ -1906,7 +1936,7 @@ void WebServer(void){
     root["quarterGreen"] = quarterColor.G;
     root["quarterBlue"] = quarterColor.B;
     root["mode"] = animationState;
-    root["invert"] = invert;
+    root["invert"] = invert; //last data for validation
     root["hour"] = timeinfo.tm_hour > 9 ? String(timeinfo.tm_hour) : "0" + String(timeinfo.tm_hour);
     root["min"] = timeinfo.tm_min > 9 ? String(timeinfo.tm_min) : "0" + String(timeinfo.tm_min);
     root["sec"] = timeinfo.tm_sec > 9 ? String(timeinfo.tm_sec) : "0" + String(timeinfo.tm_sec);
